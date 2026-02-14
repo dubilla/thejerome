@@ -1,0 +1,278 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+type Team = {
+  id: number;
+  name: string;
+  tournamentId: number;
+  roundId: number;
+  isEliminated: boolean;
+  round: { id: number; name: string; order: number; points: number } | null;
+};
+
+type Tournament = {
+  id: number;
+  name: string;
+  startsAt: string;
+  locked: boolean;
+  teams: Team[];
+};
+
+type ExistingPick = {
+  id: number;
+  entryId: number;
+  tournamentId: number;
+  teamId: number;
+  scoreCache: number;
+};
+
+type ExistingEntry = {
+  id: number;
+  name: string;
+  userId: number;
+  yearId: number;
+};
+
+export default function EntryForm() {
+  const router = useRouter();
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [entryName, setEntryName] = useState("");
+  const [selectedTeams, setSelectedTeams] = useState<
+    Record<number, string>
+  >({});
+  const [existingEntry, setExistingEntry] = useState<ExistingEntry | null>(
+    null
+  );
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const [tournamentsRes, entryRes] = await Promise.all([
+        fetch("/api/tournaments"),
+        fetch("/api/entries"),
+      ]);
+
+      if (!tournamentsRes.ok) throw new Error("Failed to fetch tournaments");
+
+      const tournamentsData = await tournamentsRes.json();
+      setTournaments(tournamentsData.tournaments || []);
+
+      if (entryRes.ok) {
+        const entryData = await entryRes.json();
+        if (entryData.entry) {
+          setExistingEntry(entryData.entry);
+          setEntryName(entryData.entry.name);
+
+          // Pre-populate picks
+          const pickMap: Record<number, string> = {};
+          for (const pick of entryData.picks || []) {
+            pickMap[pick.tournamentId] = String(pick.teamId);
+          }
+          setSelectedTeams(pickMap);
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load data");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+
+    // Validate all unlocked tournaments have picks
+    const unlockedTournaments = tournaments.filter((t) => !t.locked);
+    const missingPicks = unlockedTournaments.filter(
+      (t) => !selectedTeams[t.id]
+    );
+
+    if (missingPicks.length > 0) {
+      setError(
+        `Please make picks for: ${missingPicks.map((t) => t.name).join(", ")}`
+      );
+      return;
+    }
+
+    setSaving(true);
+
+    const picks = Object.entries(selectedTeams).map(
+      ([tournamentId, teamId]) => ({
+        tournamentId: parseInt(tournamentId),
+        teamId: parseInt(teamId),
+      })
+    );
+
+    try {
+      if (existingEntry) {
+        // Update existing entry
+        const res = await fetch("/api/entries", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            entryId: existingEntry.id,
+            name: entryName,
+            picks,
+          }),
+        });
+
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || "Failed to update entry");
+        }
+      } else {
+        // Create new entry
+        const res = await fetch("/api/entries", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: entryName, picks }),
+        });
+
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || "Failed to create entry");
+        }
+      }
+
+      router.push("/leaders");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save entry");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-12">
+        <p className="text-muted-foreground">Loading tournaments...</p>
+      </div>
+    );
+  }
+
+  const unlockedTournaments = tournaments.filter((t) => !t.locked);
+  const lockedTournaments = tournaments.filter((t) => t.locked);
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {error && (
+        <p className="rounded-md bg-red-50 p-3 text-sm text-red-600">
+          {error}
+        </p>
+      )}
+
+      <div className="space-y-2">
+        <Label htmlFor="entryName">Entry Name</Label>
+        <Input
+          id="entryName"
+          value={entryName}
+          onChange={(e) => setEntryName(e.target.value)}
+          placeholder="Enter your entry name"
+          required
+        />
+      </div>
+
+      {unlockedTournaments.length > 0 && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Make Your Picks</h3>
+          {unlockedTournaments.map((tournament) => (
+            <Card key={tournament.id}>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">{tournament.name}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Select
+                  value={selectedTeams[tournament.id] || ""}
+                  onValueChange={(value) =>
+                    setSelectedTeams((prev) => ({
+                      ...prev,
+                      [tournament.id]: value,
+                    }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a team" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {tournament.teams.map((team) => (
+                      <SelectItem key={team.id} value={String(team.id)}>
+                        {team.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {lockedTournaments.length > 0 && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-muted-foreground">
+            Locked Tournaments
+          </h3>
+          {lockedTournaments.map((tournament) => {
+            const pickedTeamId = selectedTeams[tournament.id];
+            const pickedTeam = tournament.teams.find(
+              (t) => String(t.id) === pickedTeamId
+            );
+            return (
+              <Card key={tournament.id} className="opacity-60">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">{tournament.name}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    {pickedTeam
+                      ? `Picked: ${pickedTeam.name}`
+                      : "No pick (tournament started)"}
+                  </p>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {unlockedTournaments.length > 0 && (
+        <Button type="submit" disabled={saving} className="w-full">
+          {saving
+            ? "Saving..."
+            : existingEntry
+              ? "Update Entry"
+              : "Create Entry"}
+        </Button>
+      )}
+
+      {unlockedTournaments.length === 0 && (
+        <p className="text-center text-muted-foreground">
+          All tournaments are locked. No changes can be made.
+        </p>
+      )}
+    </form>
+  );
+}
