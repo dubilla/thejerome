@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -23,6 +24,79 @@ type Tournament = {
   startsAt: string;
   yearId: number;
 };
+
+function MobileTournamentCard({
+  tournament,
+  locked,
+  isEditing,
+  editStartsAt,
+  saving,
+  onEdit,
+  onSave,
+  onCancel,
+  onEditStartsAtChange,
+}: {
+  tournament: Tournament;
+  locked: boolean;
+  isEditing: boolean;
+  editStartsAt: string;
+  saving: boolean;
+  onEdit: () => void;
+  onSave: () => void;
+  onCancel: () => void;
+  onEditStartsAtChange: (value: string) => void;
+}) {
+  return (
+    <Card>
+      <CardHeader className="px-4 py-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm font-medium">{tournament.name}</CardTitle>
+          {locked ? (
+            <Badge variant="destructive" className="text-xs">Locked</Badge>
+          ) : (
+            <Badge variant="secondary" className="text-xs">Unlocked</Badge>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent className="px-4 pb-4 pt-0 space-y-3">
+        {isEditing ? (
+          <>
+            <Input
+              type="datetime-local"
+              value={editStartsAt}
+              onChange={(e) => onEditStartsAtChange(e.target.value)}
+              className="w-full"
+            />
+            <div className="flex gap-2">
+              <Button size="sm" onClick={onSave} disabled={saving} className="flex-1">
+                Save
+              </Button>
+              <Button size="sm" variant="outline" onClick={onCancel} className="flex-1">
+                Cancel
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="text-sm text-muted-foreground">
+              {new Date(tournament.startsAt).toLocaleString()}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" onClick={onEdit} className="flex-1">
+                Edit Time
+              </Button>
+              <Link href={`/tournaments/${tournament.id}`} className="flex-1">
+                <Button size="sm" variant="outline" className="w-full">
+                  View Teams
+                </Button>
+              </Link>
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function AdminTournamentsPage() {
   const { data: session, status } = useSession();
@@ -104,12 +178,10 @@ export default function AdminTournamentsPage() {
   if (!session?.user.isAdmin) return null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Admin: Tournaments</h1>
-        <Link href="/admin/tournaments">
-          <Badge variant="outline">Admin</Badge>
-        </Link>
+        <h1 className="text-xl font-bold md:text-2xl">Admin: Tournaments</h1>
+        <Badge variant="outline">Admin</Badge>
       </div>
 
       {error && (
@@ -118,103 +190,137 @@ export default function AdminTournamentsPage() {
         </p>
       )}
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Starts At</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Teams</TableHead>
-            <TableHead className="w-32">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {tournaments.map((tournament) => {
-            const locked = isTournamentLocked(new Date(tournament.startsAt));
-            const isEditing = editingId === tournament.id;
+      {/* Mobile card layout */}
+      <div className="space-y-3 md:hidden">
+        {tournaments.map((tournament) => {
+          const locked = isTournamentLocked(new Date(tournament.startsAt));
+          return (
+            <MobileTournamentCard
+              key={tournament.id}
+              tournament={tournament}
+              locked={locked}
+              isEditing={editingId === tournament.id}
+              editStartsAt={editStartsAt}
+              saving={saving}
+              onEdit={() => {
+                setEditingId(tournament.id);
+                setEditStartsAt(
+                  new Date(tournament.startsAt).toISOString().slice(0, 16)
+                );
+              }}
+              onSave={() => handleSave(tournament.id)}
+              onCancel={() => setEditingId(null)}
+              onEditStartsAtChange={setEditStartsAt}
+            />
+          );
+        })}
+        {tournaments.length === 0 && (
+          <p className="py-8 text-center text-muted-foreground">
+            No tournaments found
+          </p>
+        )}
+      </div>
 
-            return (
-              <TableRow key={tournament.id}>
-                <TableCell className="font-medium">
-                  {tournament.name}
-                </TableCell>
-                <TableCell>
-                  {isEditing ? (
-                    <Input
-                      type="datetime-local"
-                      value={editStartsAt}
-                      onChange={(e) => setEditStartsAt(e.target.value)}
-                      className="w-60"
-                    />
-                  ) : (
-                    new Date(tournament.startsAt).toLocaleString()
-                  )}
-                </TableCell>
-                <TableCell>
-                  {locked ? (
-                    <Badge variant="destructive">Locked</Badge>
-                  ) : (
-                    <Badge variant="secondary">Unlocked</Badge>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <Link
-                    href={`/tournaments/${tournament.id}`}
-                    className="text-sm underline hover:text-primary"
-                  >
-                    View
-                  </Link>
-                </TableCell>
-                <TableCell>
-                  {isEditing ? (
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handleSave(tournament.id)}
-                        disabled={saving}
-                      >
-                        Save
-                      </Button>
+      {/* Desktop table layout */}
+      <div className="hidden md:block">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Starts At</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Teams</TableHead>
+              <TableHead className="w-32">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {tournaments.map((tournament) => {
+              const locked = isTournamentLocked(new Date(tournament.startsAt));
+              const isEditing = editingId === tournament.id;
+
+              return (
+                <TableRow key={tournament.id}>
+                  <TableCell className="font-medium">
+                    {tournament.name}
+                  </TableCell>
+                  <TableCell>
+                    {isEditing ? (
+                      <Input
+                        type="datetime-local"
+                        value={editStartsAt}
+                        onChange={(e) => setEditStartsAt(e.target.value)}
+                        className="w-60"
+                      />
+                    ) : (
+                      new Date(tournament.startsAt).toLocaleString()
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {locked ? (
+                      <Badge variant="destructive">Locked</Badge>
+                    ) : (
+                      <Badge variant="secondary">Unlocked</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Link
+                      href={`/tournaments/${tournament.id}`}
+                      className="text-sm underline hover:text-primary"
+                    >
+                      View
+                    </Link>
+                  </TableCell>
+                  <TableCell>
+                    {isEditing ? (
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleSave(tournament.id)}
+                          disabled={saving}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setEditingId(null)}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : (
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setEditingId(null)}
+                        onClick={() => {
+                          setEditingId(tournament.id);
+                          setEditStartsAt(
+                            new Date(tournament.startsAt)
+                              .toISOString()
+                              .slice(0, 16)
+                          );
+                        }}
                       >
-                        Cancel
+                        Edit
                       </Button>
-                    </div>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setEditingId(tournament.id);
-                        setEditStartsAt(
-                          new Date(tournament.startsAt)
-                            .toISOString()
-                            .slice(0, 16)
-                        );
-                      }}
-                    >
-                      Edit
-                    </Button>
-                  )}
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+            {tournaments.length === 0 && (
+              <TableRow>
+                <TableCell
+                  colSpan={5}
+                  className="text-center text-muted-foreground"
+                >
+                  No tournaments found
                 </TableCell>
               </TableRow>
-            );
-          })}
-          {tournaments.length === 0 && (
-            <TableRow>
-              <TableCell
-                colSpan={5}
-                className="text-center text-muted-foreground"
-              >
-                No tournaments found
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

@@ -125,8 +125,8 @@ export default function EditTeamPage() {
   if (!session?.user.isAdmin || !team) return null;
 
   return (
-    <div className="mx-auto max-w-lg space-y-6">
-      <h1 className="text-2xl font-bold">Edit Team</h1>
+    <div className="mx-auto max-w-lg space-y-4 md:space-y-6">
+      <h1 className="text-xl font-bold md:text-2xl">Edit Team</h1>
 
       {error && (
         <p className="rounded-md bg-red-50 p-3 text-sm text-red-600">
@@ -135,15 +135,15 @@ export default function EditTeamPage() {
       )}
 
       <Card>
-        <CardHeader>
-          <CardTitle>{team.name}</CardTitle>
+        <CardHeader className="px-4 py-3 md:px-6 md:py-4">
+          <CardTitle className="text-base md:text-lg">{team.name}</CardTitle>
           {team.tournament && (
             <p className="text-sm text-muted-foreground">
               {team.tournament.name}
             </p>
           )}
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="px-4 pb-4 pt-0 md:px-6 space-y-4">
           <div className="space-y-2">
             <Label>Round</Label>
             <Select
@@ -176,13 +176,14 @@ export default function EditTeamPage() {
             <Label htmlFor="eliminated">Eliminated</Label>
           </div>
 
-          <div className="flex gap-2">
-            <Button onClick={handleSave} disabled={saving}>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button onClick={handleSave} disabled={saving} className="flex-1">
               {saving ? "Saving..." : "Save Changes"}
             </Button>
             <Button
               variant="outline"
               onClick={() => router.push("/admin/tournaments")}
+              className="flex-1"
             >
               Cancel
             </Button>

@@ -65,10 +65,10 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex items-center justify-center px-4 pt-8 pb-12 md:pt-20">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Sign Up</CardTitle>
+        <CardHeader className="text-center">
+          <CardTitle className="text-xl md:text-2xl">Sign Up</CardTitle>
           <CardDescription>
             Create a new TheJerome account
           </CardDescription>
@@ -76,7 +76,9 @@ export default function SignUpPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <p className="text-sm text-red-600">{error}</p>
+              <p className="rounded-md bg-red-50 p-3 text-sm text-red-600">
+                {error}
+              </p>
             )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
