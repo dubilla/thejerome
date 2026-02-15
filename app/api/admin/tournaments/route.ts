@@ -43,18 +43,21 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const { tournamentId, startsAt } = await request.json();
+    const { tournamentId, startsAt, endsAt } = await request.json();
 
-    if (!tournamentId || !startsAt) {
+    if (!tournamentId || !startsAt || !endsAt) {
       return NextResponse.json(
-        { error: "Tournament ID and start time are required" },
+        { error: "Tournament ID, start time, and end time are required" },
         { status: 400 }
       );
     }
 
     const [updated] = await db
       .update(tournaments)
-      .set({ startsAt: new Date(startsAt) })
+      .set({
+        startsAt: new Date(startsAt),
+        endsAt: new Date(endsAt),
+      })
       .where(eq(tournaments.id, tournamentId))
       .returning();
 

@@ -55,6 +55,7 @@ export const tournaments = pgTable("tournaments", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   startsAt: timestamp("starts_at", { mode: "date" }).notNull(),
+  endsAt: timestamp("ends_at", { mode: "date" }).notNull(),
   yearId: integer("year_id")
     .notNull()
     .references(() => years.id),

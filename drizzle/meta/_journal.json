@@ -8,6 +8,13 @@
       "when": 1771102880046,
       "tag": "0000_purple_thunderbolt_ross",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1771126927496,
+      "tag": "0001_lonely_nicolaos",
+      "breakpoints": true
     }
   ]
 }
