@@ -29,6 +29,7 @@ type Tournament = {
   id: number;
   name: string;
   startsAt: string;
+  endsAt: string;
   locked: boolean;
   teams: Team[];
 };

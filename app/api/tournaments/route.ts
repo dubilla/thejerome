@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { years, tournaments, teams, rounds } from "@/lib/db/schema";
-import { isTournamentLocked } from "@/lib/utils/tournament";
+import {
+  isTournamentLocked,
+  sortTournamentsByStatusAndStartDate,
+} from "@/lib/utils/tournament";
 
 export async function GET() {
   try {
@@ -49,7 +52,10 @@ export async function GET() {
       })),
     }));
 
-    return NextResponse.json({ tournaments: data, year: activeYear });
+    // Sort tournaments by status (in-progress → upcoming → completed) then by start date
+    const sortedData = sortTournamentsByStatusAndStartDate(data);
+
+    return NextResponse.json({ tournaments: sortedData, year: activeYear });
   } catch (error) {
     console.error("GET /api/tournaments error:", error);
     return NextResponse.json(

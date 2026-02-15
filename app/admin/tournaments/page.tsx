@@ -22,6 +22,7 @@ type Tournament = {
   id: number;
   name: string;
   startsAt: string;
+  endsAt: string;
   yearId: number;
 };
 
@@ -30,21 +31,25 @@ function MobileTournamentCard({
   locked,
   isEditing,
   editStartsAt,
+  editEndsAt,
   saving,
   onEdit,
   onSave,
   onCancel,
   onEditStartsAtChange,
+  onEditEndsAtChange,
 }: {
   tournament: Tournament;
   locked: boolean;
   isEditing: boolean;
   editStartsAt: string;
+  editEndsAt: string;
   saving: boolean;
   onEdit: () => void;
   onSave: () => void;
   onCancel: () => void;
   onEditStartsAtChange: (value: string) => void;
+  onEditEndsAtChange: (value: string) => void;
 }) {
   return (
     <Card>
@@ -66,6 +71,14 @@ function MobileTournamentCard({
               value={editStartsAt}
               onChange={(e) => onEditStartsAtChange(e.target.value)}
               className="w-full"
+              placeholder="Starts at"
+            />
+            <Input
+              type="datetime-local"
+              value={editEndsAt}
+              onChange={(e) => onEditEndsAtChange(e.target.value)}
+              className="w-full"
+              placeholder="Ends at"
             />
             <div className="flex gap-2">
               <Button size="sm" onClick={onSave} disabled={saving} className="flex-1">
@@ -78,9 +91,14 @@ function MobileTournamentCard({
           </>
         ) : (
           <>
-            <p className="text-sm text-muted-foreground">
-              {new Date(tournament.startsAt).toLocaleString()}
-            </p>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">
+                Starts: {new Date(tournament.startsAt).toLocaleString()}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Ends: {new Date(tournament.endsAt).toLocaleString()}
+              </p>
+            </div>
             <div className="flex items-center gap-2">
               <Button size="sm" variant="outline" onClick={onEdit} className="flex-1">
                 Edit Time
@@ -104,6 +122,7 @@ export default function AdminTournamentsPage() {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editStartsAt, setEditStartsAt] = useState("");
+  const [editEndsAt, setEditEndsAt] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -150,6 +169,7 @@ export default function AdminTournamentsPage() {
         body: JSON.stringify({
           tournamentId,
           startsAt: editStartsAt,
+          endsAt: editEndsAt,
         }),
       });
 
@@ -201,16 +221,21 @@ export default function AdminTournamentsPage() {
               locked={locked}
               isEditing={editingId === tournament.id}
               editStartsAt={editStartsAt}
+              editEndsAt={editEndsAt}
               saving={saving}
               onEdit={() => {
                 setEditingId(tournament.id);
                 setEditStartsAt(
                   new Date(tournament.startsAt).toISOString().slice(0, 16)
                 );
+                setEditEndsAt(
+                  new Date(tournament.endsAt).toISOString().slice(0, 16)
+                );
               }}
               onSave={() => handleSave(tournament.id)}
               onCancel={() => setEditingId(null)}
               onEditStartsAtChange={setEditStartsAt}
+              onEditEndsAtChange={setEditEndsAt}
             />
           );
         })}
@@ -228,6 +253,7 @@ export default function AdminTournamentsPage() {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Starts At</TableHead>
+              <TableHead>Ends At</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Teams</TableHead>
               <TableHead className="w-32">Actions</TableHead>
@@ -253,6 +279,18 @@ export default function AdminTournamentsPage() {
                       />
                     ) : (
                       new Date(tournament.startsAt).toLocaleString()
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {isEditing ? (
+                      <Input
+                        type="datetime-local"
+                        value={editEndsAt}
+                        onChange={(e) => setEditEndsAt(e.target.value)}
+                        className="w-60"
+                      />
+                    ) : (
+                      new Date(tournament.endsAt).toLocaleString()
                     )}
                   </TableCell>
                   <TableCell>
@@ -299,6 +337,11 @@ export default function AdminTournamentsPage() {
                               .toISOString()
                               .slice(0, 16)
                           );
+                          setEditEndsAt(
+                            new Date(tournament.endsAt)
+                              .toISOString()
+                              .slice(0, 16)
+                          );
                         }}
                       >
                         Edit
@@ -311,7 +354,7 @@ export default function AdminTournamentsPage() {
             {tournaments.length === 0 && (
               <TableRow>
                 <TableCell
-                  colSpan={5}
+                  colSpan={6}
                   className="text-center text-muted-foreground"
                 >
                   No tournaments found
