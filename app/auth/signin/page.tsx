@@ -44,10 +44,10 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex items-center justify-center px-4 pt-8 pb-12 md:pt-20">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Sign In</CardTitle>
+        <CardHeader className="text-center">
+          <CardTitle className="text-xl md:text-2xl">Sign In</CardTitle>
           <CardDescription>
             Sign in to your TheJerome account
           </CardDescription>
@@ -55,7 +55,9 @@ export default function SignInPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <p className="text-sm text-red-600">{error}</p>
+              <p className="rounded-md bg-red-50 p-3 text-sm text-red-600">
+                {error}
+              </p>
             )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>

@@ -28,8 +28,8 @@ export default function NewEntryPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-2xl font-bold">My Entry</h1>
+    <div className="mx-auto max-w-2xl space-y-4 md:space-y-6">
+      <h1 className="text-xl font-bold md:text-2xl">My Entry</h1>
       <EntryForm />
     </div>
   );

@@ -28,6 +28,19 @@ type Tournament = {
   teams: Team[];
 };
 
+function MobileTeamRow({ team }: { team: Team }) {
+  return (
+    <div className="flex items-center justify-between py-2">
+      <span className="text-sm font-medium">{team.name}</span>
+      {team.isEliminated ? (
+        <Badge variant="destructive" className="text-xs">Eliminated</Badge>
+      ) : (
+        <Badge variant="secondary" className="text-xs">Active</Badge>
+      )}
+    </div>
+  );
+}
+
 export default function TournamentDetailPage() {
   const params = useParams();
   const [tournament, setTournament] = useState<Tournament | null>(null);
@@ -99,44 +112,54 @@ export default function TournamentDetailPage() {
   });
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">{tournament.name}</h1>
+    <div className="space-y-4 md:space-y-6">
+      <h1 className="text-xl font-bold md:text-2xl">{tournament.name}</h1>
 
       {sortedRounds.map(([roundName, teams]) => (
         <Card key={roundName}>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+          <CardHeader className="px-4 py-3 md:px-6 md:py-4">
+            <CardTitle className="flex items-center gap-2 text-sm font-semibold md:text-base">
               {roundName}
               {teams[0]?.round?.points ? (
-                <Badge variant="secondary">
+                <Badge variant="secondary" className="text-xs">
                   {teams[0].round.points} pts
                 </Badge>
               ) : null}
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Team</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {teams.map((team) => (
-                  <TableRow key={team.id}>
-                    <TableCell className="font-medium">{team.name}</TableCell>
-                    <TableCell>
-                      {team.isEliminated ? (
-                        <Badge variant="destructive">Eliminated</Badge>
-                      ) : (
-                        <Badge variant="secondary">Active</Badge>
-                      )}
-                    </TableCell>
+          <CardContent className="px-4 pb-4 pt-0 md:px-6">
+            {/* Mobile layout */}
+            <div className="divide-y md:hidden">
+              {teams.map((team) => (
+                <MobileTeamRow key={team.id} team={team} />
+              ))}
+            </div>
+
+            {/* Desktop table layout */}
+            <div className="hidden md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Team</TableHead>
+                    <TableHead>Status</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {teams.map((team) => (
+                    <TableRow key={team.id}>
+                      <TableCell className="font-medium">{team.name}</TableCell>
+                      <TableCell>
+                        {team.isEliminated ? (
+                          <Badge variant="destructive">Eliminated</Badge>
+                        ) : (
+                          <Badge variant="secondary">Active</Badge>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       ))}

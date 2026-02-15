@@ -13,6 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Lock } from "lucide-react";
 
 type Team = {
   id: number;
@@ -29,14 +31,6 @@ type Tournament = {
   startsAt: string;
   locked: boolean;
   teams: Team[];
-};
-
-type ExistingPick = {
-  id: number;
-  entryId: number;
-  tournamentId: number;
-  teamId: number;
-  scoreCache: number;
 };
 
 type ExistingEntry = {
@@ -196,65 +190,69 @@ export default function EntryForm() {
       </div>
 
       {unlockedTournaments.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Make Your Picks</h3>
-          {unlockedTournaments.map((tournament) => (
-            <Card key={tournament.id}>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">{tournament.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Select
-                  value={selectedTeams[tournament.id] || ""}
-                  onValueChange={(value) =>
-                    setSelectedTeams((prev) => ({
-                      ...prev,
-                      [tournament.id]: value,
-                    }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a team" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {tournament.teams.map((team) => (
-                      <SelectItem key={team.id} value={String(team.id)}>
-                        {team.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="space-y-3">
+          <h3 className="text-base font-semibold md:text-lg">Make Your Picks</h3>
+          <div className="space-y-3">
+            {unlockedTournaments.map((tournament) => (
+              <Card key={tournament.id}>
+                <CardHeader className="px-4 py-3 md:px-6 md:py-4">
+                  <CardTitle className="text-sm font-medium md:text-base">
+                    {tournament.name}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-4 pt-0 md:px-6">
+                  <Select
+                    value={selectedTeams[tournament.id] || ""}
+                    onValueChange={(value) =>
+                      setSelectedTeams((prev) => ({
+                        ...prev,
+                        [tournament.id]: value,
+                      }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a team" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {tournament.teams.map((team) => (
+                        <SelectItem key={team.id} value={String(team.id)}>
+                          {team.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       )}
 
       {lockedTournaments.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-muted-foreground">
+        <div className="space-y-3">
+          <h3 className="flex items-center gap-2 text-base font-semibold text-muted-foreground md:text-lg">
+            <Lock className="h-4 w-4" />
             Locked Tournaments
           </h3>
-          {lockedTournaments.map((tournament) => {
-            const pickedTeamId = selectedTeams[tournament.id];
-            const pickedTeam = tournament.teams.find(
-              (t) => String(t.id) === pickedTeamId
-            );
-            return (
-              <Card key={tournament.id} className="opacity-60">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base">{tournament.name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    {pickedTeam
-                      ? `Picked: ${pickedTeam.name}`
-                      : "No pick (tournament started)"}
-                  </p>
-                </CardContent>
-              </Card>
-            );
-          })}
+          <div className="space-y-2">
+            {lockedTournaments.map((tournament) => {
+              const pickedTeamId = selectedTeams[tournament.id];
+              const pickedTeam = tournament.teams.find(
+                (t) => String(t.id) === pickedTeamId
+              );
+              return (
+                <div
+                  key={tournament.id}
+                  className="flex items-center justify-between rounded-lg border border-dashed p-3 opacity-60"
+                >
+                  <span className="text-sm font-medium">{tournament.name}</span>
+                  <Badge variant="outline" className="text-xs">
+                    {pickedTeam ? pickedTeam.name : "No pick"}
+                  </Badge>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
@@ -269,7 +267,7 @@ export default function EntryForm() {
       )}
 
       {unlockedTournaments.length === 0 && (
-        <p className="text-center text-muted-foreground">
+        <p className="text-center text-sm text-muted-foreground">
           All tournaments are locked. No changes can be made.
         </p>
       )}
