@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
+    "postbuild": "npm run db:migrate && npm run db:seed",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
