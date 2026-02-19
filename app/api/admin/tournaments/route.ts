@@ -43,21 +43,30 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const { tournamentId, startsAt, endsAt } = await request.json();
+    const { tournamentId, startsAt, endsAt, isNeutralSite } = await request.json();
 
-    if (!tournamentId || !startsAt || !endsAt) {
+    if (!tournamentId) {
       return NextResponse.json(
-        { error: "Tournament ID, start time, and end time are required" },
+        { error: "Tournament ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const updateData: { startsAt?: Date; endsAt?: Date; isNeutralSite?: boolean } = {};
+    if (startsAt !== undefined) updateData.startsAt = new Date(startsAt);
+    if (endsAt !== undefined) updateData.endsAt = new Date(endsAt);
+    if (isNeutralSite !== undefined) updateData.isNeutralSite = isNeutralSite;
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json(
+        { error: "No fields to update" },
         { status: 400 }
       );
     }
 
     const [updated] = await db
       .update(tournaments)
-      .set({
-        startsAt: new Date(startsAt),
-        endsAt: new Date(endsAt),
-      })
+      .set(updateData)
       .where(eq(tournaments.id, tournamentId))
       .returning();
 

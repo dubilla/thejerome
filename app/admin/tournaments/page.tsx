@@ -5,7 +5,9 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -23,6 +25,7 @@ type Tournament = {
   name: string;
   startsAt: string;
   endsAt: string;
+  isNeutralSite: boolean;
   yearId: number;
 };
 
@@ -158,6 +161,28 @@ export default function AdminTournamentsPage() {
     }
   }, [session, fetchTournaments]);
 
+  async function handleToggleNeutralSite(tournament: Tournament) {
+    try {
+      const res = await fetch("/api/admin/tournaments", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tournamentId: tournament.id,
+          isNeutralSite: !tournament.isNeutralSite,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to update");
+      }
+
+      fetchTournaments();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save");
+    }
+  }
+
   async function handleSave(tournamentId: number) {
     setSaving(true);
     setError("");
@@ -255,6 +280,7 @@ export default function AdminTournamentsPage() {
               <TableHead>Starts At</TableHead>
               <TableHead>Ends At</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Neutral Site</TableHead>
               <TableHead>Teams</TableHead>
               <TableHead className="w-32">Actions</TableHead>
             </TableRow>
@@ -299,6 +325,23 @@ export default function AdminTournamentsPage() {
                     ) : (
                       <Badge variant="secondary">Unlocked</Badge>
                     )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`neutral-${tournament.id}`}
+                        checked={tournament.isNeutralSite}
+                        onCheckedChange={() =>
+                          handleToggleNeutralSite(tournament)
+                        }
+                      />
+                      <Label
+                        htmlFor={`neutral-${tournament.id}`}
+                        className="text-sm"
+                      >
+                        {tournament.isNeutralSite ? "Yes" : "No"}
+                      </Label>
+                    </div>
                   </TableCell>
                   <TableCell>
                     <Link
@@ -354,7 +397,7 @@ export default function AdminTournamentsPage() {
             {tournaments.length === 0 && (
               <TableRow>
                 <TableCell
-                  colSpan={6}
+                  colSpan={7}
                   className="text-center text-muted-foreground"
                 >
                   No tournaments found

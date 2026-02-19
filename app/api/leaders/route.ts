@@ -8,6 +8,7 @@ import {
   teams,
   rounds,
   users,
+  tournaments,
 } from "@/lib/db/schema";
 import { calculateEntryScore } from "@/lib/utils/scoring";
 import { calculatePPR } from "@/lib/utils/ppr";
@@ -35,6 +36,7 @@ export async function GET() {
     const allTeams = await db.select().from(teams);
     const allRounds = await db.select().from(rounds);
     const allUsers = await db.select().from(users);
+    const allTournaments = await db.select().from(tournaments);
 
     // Build lookups
     const usersById = new Map(allUsers.map((u) => [u.id, u]));
@@ -49,8 +51,8 @@ export async function GET() {
     // Calculate scores and PPR for each entry
     const leaderboard = allEntries.map((entry) => {
       const entryPicks = picksByEntry.get(entry.id) || [];
-      const score = calculateEntryScore(entryPicks, allTeams, allRounds);
-      const ppr = calculatePPR(score, entryPicks, allTeams, allRounds);
+      const score = calculateEntryScore(entryPicks, allTeams, allRounds, allTournaments);
+      const ppr = calculatePPR(score, entryPicks, allTeams, allRounds, allTournaments);
       const user = usersById.get(entry.userId);
 
       return {

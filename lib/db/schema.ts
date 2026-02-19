@@ -58,6 +58,7 @@ export const tournaments = pgTable(
     name: varchar("name", { length: 255 }).notNull(),
     startsAt: timestamp("starts_at", { mode: "date" }).notNull(),
     endsAt: timestamp("ends_at", { mode: "date" }).notNull(),
+    isNeutralSite: boolean("is_neutral_site").notNull().default(false),
     yearId: integer("year_id")
       .notNull()
       .references(() => years.id),
@@ -78,6 +79,7 @@ export const teams = pgTable(
   {
     id: serial("id").primaryKey(),
     name: varchar("name", { length: 255 }).notNull(),
+    seed: integer("seed"),
     tournamentId: integer("tournament_id")
       .notNull()
       .references(() => tournaments.id),

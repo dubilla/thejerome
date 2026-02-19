@@ -19,6 +19,7 @@ import { Lock } from "lucide-react";
 type Team = {
   id: number;
   name: string;
+  seed: number | null;
   tournamentId: number;
   roundId: number;
   isEliminated: boolean;
@@ -217,6 +218,7 @@ export default function EntryForm() {
                     <SelectContent>
                       {tournament.teams.map((team) => (
                         <SelectItem key={team.id} value={String(team.id)}>
+                          {team.seed != null ? `(${team.seed}) ` : ""}
                           {team.name}
                         </SelectItem>
                       ))}

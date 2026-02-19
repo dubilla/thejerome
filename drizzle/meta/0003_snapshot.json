@@ -1,6 +1,6 @@
 {
-  "id": "964b0a7a-8c40-4a0e-97e4-76428dc9df69",
-  "prevId": "762dee90-75be-4f36-8501-9d30611faa44",
+  "id": "372a665f-3fdd-4282-9dc1-d03b85d38076",
+  "prevId": "5ebb0bd5-3138-4818-9709-9bc0687fee66",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -295,7 +295,16 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "teams_name_tournament_unique": {
+          "name": "teams_name_tournament_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name",
+            "tournament_id"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -318,6 +327,12 @@
         },
         "starts_at": {
           "name": "starts_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ends_at": {
+          "name": "ends_at",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true
@@ -353,7 +368,16 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "tournaments_name_year_unique": {
+          "name": "tournaments_name_year_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name",
+            "year_id"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

@@ -44,7 +44,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const { teamId, roundId, isEliminated } = await request.json();
+    const { teamId, roundId, isEliminated, seed } = await request.json();
 
     if (!teamId) {
       return NextResponse.json(
@@ -53,9 +53,10 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const updateData: { roundId?: number; isEliminated?: boolean } = {};
+    const updateData: { roundId?: number; isEliminated?: boolean; seed?: number | null } = {};
     if (roundId !== undefined) updateData.roundId = roundId;
     if (isEliminated !== undefined) updateData.isEliminated = isEliminated;
+    if (seed !== undefined) updateData.seed = seed;
 
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
