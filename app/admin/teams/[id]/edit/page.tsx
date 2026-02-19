@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -25,6 +26,7 @@ type Round = {
 type Team = {
   id: number;
   name: string;
+  seed: number | null;
   roundId: number;
   isEliminated: boolean;
   tournament: { id: number; name: string } | null;
@@ -38,6 +40,7 @@ export default function EditTeamPage() {
   const [team, setTeam] = useState<Team | null>(null);
   const [rounds, setRounds] = useState<Round[]>([]);
   const [selectedRoundId, setSelectedRoundId] = useState("");
+  const [seed, setSeed] = useState<string>("");
   const [isEliminated, setIsEliminated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -71,6 +74,7 @@ export default function EditTeamPage() {
 
       setTeam(found);
       setSelectedRoundId(String(found.roundId));
+      setSeed(found.seed != null ? String(found.seed) : "");
       setIsEliminated(found.isEliminated);
       setRounds(data.rounds || []);
     } catch (err) {
@@ -97,6 +101,7 @@ export default function EditTeamPage() {
         body: JSON.stringify({
           teamId: parseInt(params.id as string),
           roundId: parseInt(selectedRoundId),
+          seed: seed === "" ? null : parseInt(seed),
           isEliminated,
         }),
       });
@@ -163,6 +168,18 @@ export default function EditTeamPage() {
                   ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="seed">Seed</Label>
+            <Input
+              id="seed"
+              type="number"
+              min="1"
+              value={seed}
+              onChange={(e) => setSeed(e.target.value)}
+              placeholder="e.g. 1, 2, 3..."
+            />
           </div>
 
           <div className="flex items-center space-x-2">

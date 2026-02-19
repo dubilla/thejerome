@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 type Team = {
   id: number;
   name: string;
+  seed: number | null;
   isEliminated: boolean;
   round: { id: number; name: string; order: number; points: number } | null;
 };
@@ -147,7 +148,10 @@ export default function TournamentDetailPage() {
                 <TableBody>
                   {teams.map((team) => (
                     <TableRow key={team.id}>
-                      <TableCell className="font-medium">{team.name}</TableCell>
+                      <TableCell className="font-medium">
+                        {team.seed != null ? `(${team.seed}) ` : ""}
+                        {team.name}
+                      </TableCell>
                       <TableCell>
                         {team.isEliminated ? (
                           <Badge variant="destructive">Eliminated</Badge>

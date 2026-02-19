@@ -1,2 +1,0 @@
-ALTER TABLE "teams" ADD CONSTRAINT "teams_name_tournament_unique" UNIQUE("name","tournament_id");--> statement-breakpoint
-ALTER TABLE "tournaments" ADD CONSTRAINT "tournaments_name_year_unique" UNIQUE("name","year_id");
