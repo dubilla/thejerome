@@ -70,10 +70,10 @@ async function main() {
 
   // ─── Seed Tournaments ────────────────────────────────────────────────
   const tournamentData = [
-    { name: "ACC Tournament", startsAt: new Date("2026-03-11"), yearId: year2026.id },
-    { name: "Big Ten Tournament", startsAt: new Date("2026-03-12"), yearId: year2026.id },
-    { name: "SEC Tournament", startsAt: new Date("2026-03-11"), yearId: year2026.id },
-    { name: "Big 12 Tournament", startsAt: new Date("2026-03-13"), yearId: year2026.id },
+    { name: "ACC Tournament", startsAt: new Date("2026-03-11"), endsAt: new Date("2026-03-14"), yearId: year2026.id },
+    { name: "Big Ten Tournament", startsAt: new Date("2026-03-12"), endsAt: new Date("2026-03-15"), yearId: year2026.id },
+    { name: "SEC Tournament", startsAt: new Date("2026-03-11"), endsAt: new Date("2026-03-14"), yearId: year2026.id },
+    { name: "Big 12 Tournament", startsAt: new Date("2026-03-13"), endsAt: new Date("2026-03-16"), yearId: year2026.id },
   ];
 
   for (const tournament of tournamentData) {
