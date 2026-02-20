@@ -51,15 +51,19 @@ export const roundsRelations = relations(rounds, ({ many }) => ({
 
 // ─── Tournaments ─────────────────────────────────────────────────────
 
-export const tournaments = pgTable("tournaments", {
-  id: serial("id").primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
-  startsAt: timestamp("starts_at", { mode: "date" }).notNull(),
-  endsAt: timestamp("ends_at", { mode: "date" }).notNull(),
-  yearId: integer("year_id")
-    .notNull()
-    .references(() => years.id),
-});
+export const tournaments = pgTable(
+  "tournaments",
+  {
+    id: serial("id").primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    startsAt: timestamp("starts_at", { mode: "date" }).notNull(),
+    endsAt: timestamp("ends_at", { mode: "date" }).notNull(),
+    yearId: integer("year_id")
+      .notNull()
+      .references(() => years.id),
+  },
+  (table) => [unique("tournaments_name_year_unique").on(table.name, table.yearId)]
+);
 
 export const tournamentsRelations = relations(tournaments, ({ one, many }) => ({
   year: one(years, { fields: [tournaments.yearId], references: [years.id] }),
@@ -69,17 +73,21 @@ export const tournamentsRelations = relations(tournaments, ({ one, many }) => ({
 
 // ─── Teams ───────────────────────────────────────────────────────────
 
-export const teams = pgTable("teams", {
-  id: serial("id").primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
-  tournamentId: integer("tournament_id")
-    .notNull()
-    .references(() => tournaments.id),
-  roundId: integer("round_id")
-    .notNull()
-    .references(() => rounds.id),
-  isEliminated: boolean("is_eliminated").notNull().default(false),
-});
+export const teams = pgTable(
+  "teams",
+  {
+    id: serial("id").primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    tournamentId: integer("tournament_id")
+      .notNull()
+      .references(() => tournaments.id),
+    roundId: integer("round_id")
+      .notNull()
+      .references(() => rounds.id),
+    isEliminated: boolean("is_eliminated").notNull().default(false),
+  },
+  (table) => [unique("teams_name_tournament_unique").on(table.name, table.tournamentId)]
+);
 
 export const teamsRelations = relations(teams, ({ one, many }) => ({
   tournament: one(tournaments, {

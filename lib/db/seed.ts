@@ -19,6 +19,14 @@ const db = drizzle(client);
 async function main() {
   console.log("Seeding database...");
 
+  // Check if database is already seeded
+  const existingYears = await db.select().from(years);
+  if (existingYears.length > 0) {
+    console.log("Database already seeded, skipping...");
+    await client.end();
+    return;
+  }
+
   // ─── Seed Rounds ─────────────────────────────────────────────────────
   const roundData = [
     { name: "Round 1", order: 1, points: 0 },
@@ -80,7 +88,7 @@ async function main() {
     await db
       .insert(tournaments)
       .values(tournament)
-      .onConflictDoNothing();
+      .onConflictDoNothing({ target: [tournaments.name, tournaments.yearId] });
   }
   console.log("  ✓ Tournaments seeded");
 
@@ -123,7 +131,10 @@ async function main() {
   ];
 
   for (const team of teamData) {
-    await db.insert(teams).values(team).onConflictDoNothing();
+    await db
+      .insert(teams)
+      .values(team)
+      .onConflictDoNothing({ target: [teams.name, teams.tournamentId] });
   }
   console.log("  ✓ Teams seeded");
 
