@@ -66,7 +66,7 @@ export default function TournamentDetailPage() {
 
       if (!found) {
         setError("Tournament not found");
-      } else if (!found.locked) {
+      } else if (!found.locked && !session?.user.isAdmin) {
         setError("Tournament hasn't started yet");
       } else {
         setTournament(found);
