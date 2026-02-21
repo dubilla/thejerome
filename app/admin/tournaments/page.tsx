@@ -106,9 +106,9 @@ function MobileTournamentCard({
               <Button size="sm" variant="outline" onClick={onEdit} className="flex-1">
                 Edit Time
               </Button>
-              <Link href={`/tournaments/${tournament.id}`} className="flex-1">
+              <Link href={`/admin/tournaments/${tournament.id}/teams`} className="flex-1">
                 <Button size="sm" variant="outline" className="w-full">
-                  View Teams
+                  Manage Teams
                 </Button>
               </Link>
             </div>
@@ -345,10 +345,10 @@ export default function AdminTournamentsPage() {
                   </TableCell>
                   <TableCell>
                     <Link
-                      href={`/tournaments/${tournament.id}`}
+                      href={`/admin/tournaments/${tournament.id}/teams`}
                       className="text-sm underline hover:text-primary"
                     >
-                      View
+                      Manage Teams
                     </Link>
                   </TableCell>
                   <TableCell>
