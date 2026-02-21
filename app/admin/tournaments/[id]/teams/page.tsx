@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
 import {
   Table,
   TableBody,
@@ -29,24 +31,21 @@ type Tournament = {
   teams: Team[];
 };
 
-function MobileTeamRow({ team }: { team: Team }) {
-  return (
-    <div className="flex items-center justify-between py-2">
-      <span className="text-sm font-medium">{team.name}</span>
-      {team.isEliminated ? (
-        <Badge variant="destructive" className="text-xs">Eliminated</Badge>
-      ) : (
-        <Badge variant="secondary" className="text-xs">Active</Badge>
-      )}
-    </div>
-  );
-}
-
-export default function TournamentDetailPage() {
+export default function AdminTournamentTeamsPage() {
   const params = useParams();
+  const router = useRouter();
+  const { data: session, status } = useSession();
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/auth/signin");
+    } else if (status === "authenticated" && !session?.user.isAdmin) {
+      router.push("/");
+    }
+  }, [status, session, router]);
 
   const fetchTournament = useCallback(async () => {
     setLoading(true);
@@ -63,8 +62,6 @@ export default function TournamentDetailPage() {
 
       if (!found) {
         setError("Tournament not found");
-      } else if (!found.locked) {
-        setError("Tournament hasn't started yet");
       } else {
         setTournament(found);
       }
@@ -76,16 +73,20 @@ export default function TournamentDetailPage() {
   }, [params.id]);
 
   useEffect(() => {
-    fetchTournament();
-  }, [fetchTournament]);
+    if (session?.user.isAdmin) {
+      fetchTournament();
+    }
+  }, [session, fetchTournament]);
 
-  if (loading) {
+  if (status === "loading" || loading) {
     return (
       <div className="flex justify-center py-12">
         <p className="text-muted-foreground">Loading...</p>
       </div>
     );
   }
+
+  if (!session?.user.isAdmin) return null;
 
   if (error) {
     return (
@@ -114,7 +115,10 @@ export default function TournamentDetailPage() {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <h1 className="text-xl font-bold md:text-2xl">{tournament.name}</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold md:text-2xl">{tournament.name} - Teams</h1>
+        <Badge variant="outline">Admin</Badge>
+      </div>
 
       {sortedRounds.map(([roundName, teams]) => (
         <Card key={roundName}>
@@ -129,41 +133,39 @@ export default function TournamentDetailPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4 pt-0 md:px-6">
-            {/* Mobile layout */}
-            <div className="divide-y md:hidden">
-              {teams.map((team) => (
-                <MobileTeamRow key={team.id} team={team} />
-              ))}
-            </div>
-
-            {/* Desktop table layout */}
-            <div className="hidden md:block">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Team</TableHead>
-                    <TableHead>Status</TableHead>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Team</TableHead>
+                  <TableHead>Seed</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {teams.map((team) => (
+                  <TableRow key={team.id}>
+                    <TableCell className="font-medium">{team.name}</TableCell>
+                    <TableCell>{team.seed ?? "—"}</TableCell>
+                    <TableCell>
+                      {team.isEliminated ? (
+                        <Badge variant="destructive">Eliminated</Badge>
+                      ) : (
+                        <Badge variant="secondary">Active</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Link
+                        href={`/admin/teams/${team.id}/edit`}
+                        className="text-sm underline hover:text-primary"
+                      >
+                        Edit
+                      </Link>
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {teams.map((team) => (
-                    <TableRow key={team.id}>
-                      <TableCell className="font-medium">
-                        {team.seed != null ? `(${team.seed}) ` : ""}
-                        {team.name}
-                      </TableCell>
-                      <TableCell>
-                        {team.isEliminated ? (
-                          <Badge variant="destructive">Eliminated</Badge>
-                        ) : (
-                          <Badge variant="secondary">Active</Badge>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       ))}
