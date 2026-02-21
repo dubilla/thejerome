@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
 import {
   Table,
   TableBody,
@@ -44,6 +46,7 @@ function MobileTeamRow({ team }: { team: Team }) {
 
 export default function TournamentDetailPage() {
   const params = useParams();
+  const { data: session } = useSession();
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -143,6 +146,7 @@ export default function TournamentDetailPage() {
                   <TableRow>
                     <TableHead>Team</TableHead>
                     <TableHead>Status</TableHead>
+                    {session?.user.isAdmin && <TableHead>Actions</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -159,6 +163,16 @@ export default function TournamentDetailPage() {
                           <Badge variant="secondary">Active</Badge>
                         )}
                       </TableCell>
+                      {session?.user.isAdmin && (
+                        <TableCell>
+                          <Link
+                            href={`/admin/teams/${team.id}/edit`}
+                            className="text-sm underline hover:text-primary"
+                          >
+                            Edit
+                          </Link>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
