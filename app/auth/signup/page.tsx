@@ -66,32 +66,39 @@ export default function SignUpPage() {
 
   return (
     <div className="flex items-center justify-center px-4 pt-8 pb-12 md:pt-20">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-xl md:text-2xl">Sign Up</CardTitle>
-          <CardDescription>
-            Create a new TheJerome account
+      <Card className="w-full max-w-md border-2 shadow-xl">
+        <CardHeader className="text-center pb-8 bg-gradient-to-b from-secondary/5 to-transparent">
+          <CardTitle className="font-display text-3xl md:text-4xl tracking-wider text-secondary">
+            SIGN UP
+          </CardTitle>
+          <CardDescription className="text-base mt-2">
+            Join the league. Dominate the bracket.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <p className="rounded-md bg-red-50 p-3 text-sm text-red-600">
+              <p className="rounded-md bg-red-50 border-2 border-red-200 p-3 text-sm text-red-600 font-semibold">
                 {error}
               </p>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-sm font-semibold uppercase tracking-wide">
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="h-12 border-2 focus:border-primary"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-sm font-semibold uppercase tracking-wide">
+                Password
+              </Label>
               <Input
                 id="password"
                 type="password"
@@ -99,10 +106,13 @@ export default function SignUpPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 minLength={6}
                 required
+                className="h-12 border-2 focus:border-primary"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword" className="text-sm font-semibold uppercase tracking-wide">
+                Confirm Password
+              </Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -110,14 +120,15 @@ export default function SignUpPage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 minLength={6}
                 required
+                className="h-12 border-2 focus:border-primary"
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full h-12 text-base font-bold shadow-lg hover:shadow-xl transition-all cursor-pointer" disabled={loading}>
               {loading ? "Creating account..." : "Sign Up"}
             </Button>
-            <p className="text-center text-sm text-muted-foreground">
+            <p className="text-center text-sm text-muted-foreground pt-2">
               Already have an account?{" "}
-              <Link href="/auth/signin" className="underline hover:text-primary">
+              <Link href="/auth/signin" className="font-semibold text-primary hover:underline cursor-pointer">
                 Sign in
               </Link>
             </p>

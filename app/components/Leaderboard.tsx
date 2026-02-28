@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Trophy, Medal, Award } from "lucide-react";
 
 type LeaderEntry = {
   rank: number;
@@ -22,32 +23,65 @@ type LeaderEntry = {
 
 function RankBadge({ rank }: { rank: number }) {
   if (rank === 1) {
-    return <Badge className="bg-yellow-500 hover:bg-yellow-600">1st</Badge>;
+    return (
+      <div className="flex items-center gap-2">
+        <Trophy className="h-5 w-5 text-yellow-500 trophy-glow" />
+        <Badge className="bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-white font-bold shadow-lg">
+          1ST
+        </Badge>
+      </div>
+    );
   }
   if (rank === 2) {
-    return <Badge className="bg-gray-400 hover:bg-gray-500">2nd</Badge>;
+    return (
+      <div className="flex items-center gap-2">
+        <Medal className="h-5 w-5 text-gray-400" />
+        <Badge className="bg-gradient-to-r from-gray-300 to-gray-500 hover:from-gray-400 hover:to-gray-600 text-white font-bold shadow-md">
+          2ND
+        </Badge>
+      </div>
+    );
   }
   if (rank === 3) {
-    return <Badge className="bg-amber-700 hover:bg-amber-800">3rd</Badge>;
+    return (
+      <div className="flex items-center gap-2">
+        <Award className="h-5 w-5 text-amber-600" />
+        <Badge className="bg-gradient-to-r from-amber-600 to-amber-800 hover:from-amber-700 hover:to-amber-900 text-white font-bold shadow-md">
+          3RD
+        </Badge>
+      </div>
+    );
   }
-  return <span className="text-muted-foreground">{rank}</span>;
+  return <span className="scoreboard-number text-lg text-muted-foreground ml-7">{rank}</span>;
 }
 
 function MobileLeaderCard({ entry }: { entry: LeaderEntry }) {
+  const isTopThree = entry.rank <= 3;
+
   return (
-    <div className="flex items-center gap-3 rounded-lg border p-3">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center">
+    <div
+      className={`flex items-center gap-3 rounded-lg border-2 p-4 transition-all ${
+        isTopThree
+          ? "border-primary/40 bg-gradient-to-r from-primary/5 to-transparent shadow-md"
+          : "border-border bg-card"
+      }`}
+    >
+      <div className="flex shrink-0 items-center justify-start min-w-[80px]">
         <RankBadge rank={entry.rank} />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="font-medium truncate">{entry.entryName}</p>
+        <p className={`font-bold truncate ${isTopThree ? "text-lg" : "text-base"}`}>
+          {entry.entryName}
+        </p>
         <p className="text-sm text-muted-foreground truncate">
           {entry.userEmail}
         </p>
       </div>
-      <div className="text-right shrink-0">
-        <p className="font-mono font-semibold">{entry.score}</p>
-        <p className="text-xs text-muted-foreground font-mono">{entry.ppr} PPR</p>
+      <div className="text-right shrink-0 bg-secondary/10 rounded-lg px-3 py-2">
+        <p className="scoreboard-number text-2xl text-primary">{entry.score}</p>
+        <p className="text-xs text-muted-foreground font-mono uppercase tracking-wider">
+          {entry.ppr} PPR
+        </p>
       </div>
     </div>
   );
@@ -95,49 +129,87 @@ export default function Leaderboard() {
 
   if (leaders.length === 0) {
     return (
-      <p className="py-8 text-center text-muted-foreground">
-        No entries yet. Be the first to create one!
-      </p>
+      <div className="py-16 text-center">
+        <Trophy className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
+        <p className="text-lg text-muted-foreground">
+          No entries yet. Be the first to create one!
+        </p>
+      </div>
     );
   }
 
   return (
     <>
       {/* Mobile card layout */}
-      <div className="space-y-2 md:hidden">
-        {leaders.map((entry) => (
-          <MobileLeaderCard key={entry.entryId} entry={entry} />
+      <div className="space-y-3 md:hidden">
+        {leaders.map((entry, index) => (
+          <div
+            key={entry.entryId}
+            className="animate-in fade-in slide-in-from-bottom-2 duration-500"
+            style={{ animationDelay: `${index * 50}ms` }}
+          >
+            <MobileLeaderCard entry={entry} />
+          </div>
         ))}
       </div>
 
       {/* Desktop table layout */}
-      <div className="hidden md:block">
+      <div className="hidden md:block overflow-hidden rounded-lg border-2 border-border shadow-lg">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead className="w-16">Rank</TableHead>
-              <TableHead>Entry</TableHead>
-              <TableHead>User</TableHead>
-              <TableHead className="text-right">Score</TableHead>
-              <TableHead className="text-right">PPR</TableHead>
+            <TableRow className="bg-secondary hover:bg-secondary">
+              <TableHead className="w-32 text-primary-foreground font-display text-base tracking-wider">
+                RANK
+              </TableHead>
+              <TableHead className="text-primary-foreground font-display text-base tracking-wider">
+                ENTRY
+              </TableHead>
+              <TableHead className="text-primary-foreground font-display text-base tracking-wider">
+                PLAYER
+              </TableHead>
+              <TableHead className="text-right text-primary-foreground font-display text-base tracking-wider">
+                SCORE
+              </TableHead>
+              <TableHead className="text-right text-primary-foreground font-display text-base tracking-wider">
+                PPR
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {leaders.map((entry) => (
-              <TableRow key={entry.entryId}>
-                <TableCell>
-                  <RankBadge rank={entry.rank} />
-                </TableCell>
-                <TableCell className="font-medium">{entry.entryName}</TableCell>
-                <TableCell className="text-muted-foreground">
-                  {entry.userEmail}
-                </TableCell>
-                <TableCell className="text-right font-mono">
-                  {entry.score}
-                </TableCell>
-                <TableCell className="text-right font-mono">{entry.ppr}</TableCell>
-              </TableRow>
-            ))}
+            {leaders.map((entry, index) => {
+              const isTopThree = entry.rank <= 3;
+              return (
+                <TableRow
+                  key={entry.entryId}
+                  className={`animate-in fade-in slide-in-from-bottom-2 duration-500 ${
+                    isTopThree
+                      ? "bg-gradient-to-r from-primary/5 to-transparent border-l-4 border-l-primary"
+                      : ""
+                  }`}
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  <TableCell className="py-4">
+                    <RankBadge rank={entry.rank} />
+                  </TableCell>
+                  <TableCell className={`font-bold ${isTopThree ? "text-lg" : "text-base"}`}>
+                    {entry.entryName}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {entry.userEmail}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="inline-flex items-center justify-center bg-secondary/10 rounded-lg px-4 py-2">
+                      <span className={`scoreboard-number ${isTopThree ? "text-2xl text-primary" : "text-xl"}`}>
+                        {entry.score}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right scoreboard-number text-lg">
+                    {entry.ppr}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>

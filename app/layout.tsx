@@ -1,22 +1,28 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Bebas_Neue, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import SessionProvider from "./components/SessionProvider";
 import Navigation from "./components/Navigation";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const bebas = Bebas_Neue({
+  variable: "--font-bebas",
+  weight: "400",
+  subsets: ["latin"],
+});
+
+const jetbrains = JetBrains_Mono({
+  variable: "--font-jetbrains",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "TheJerome",
-  description: "Tournament bracket prediction game",
+  title: "THE JEROME | Tournament Prediction League",
+  description: "Dominate the bracket. Own the leaderboard. College basketball tournament prediction game.",
 };
 
 export default function RootLayout({
@@ -27,11 +33,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${inter.variable} ${bebas.variable} ${jetbrains.variable} antialiased`}
       >
         <SessionProvider>
           <Navigation />
-          <main className="mx-auto max-w-5xl px-4 py-6 md:px-6 md:py-8">{children}</main>
+          <main className="mx-auto max-w-6xl px-4 py-6 md:px-6 md:py-8">{children}</main>
         </SessionProvider>
       </body>
     </html>
