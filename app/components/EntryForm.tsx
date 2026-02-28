@@ -181,24 +181,31 @@ export default function EntryForm() {
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="entryName">Entry Name</Label>
+        <Label htmlFor="entryName" className="text-sm font-semibold uppercase tracking-wide">
+          Entry Name
+        </Label>
         <Input
           id="entryName"
           value={entryName}
           onChange={(e) => setEntryName(e.target.value)}
           placeholder="Enter your entry name"
           required
+          className="h-12 text-base border-2 focus:border-primary"
         />
       </div>
 
       {unlockedTournaments.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-base font-semibold md:text-lg">Make Your Picks</h3>
-          <div className="space-y-3">
+        <div className="space-y-4">
+          <h3 className="font-display text-xl tracking-wide text-secondary flex items-center gap-2">
+            MAKE YOUR PICKS
+            <div className="h-px flex-1 bg-border ml-3"></div>
+          </h3>
+          <div className="space-y-4">
             {unlockedTournaments.map((tournament) => (
-              <Card key={tournament.id}>
-                <CardHeader className="px-4 py-3 md:px-6 md:py-4">
-                  <CardTitle className="text-sm font-medium md:text-base">
+              <Card key={tournament.id} className="border-2 border-border shadow-md overflow-hidden group hover:border-primary/30 transition-colors">
+                <CardHeader className="px-4 py-3 md:px-6 md:py-4 bg-gradient-to-r from-secondary/5 to-transparent">
+                  <CardTitle className="text-base font-bold md:text-lg flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-primary"></div>
                     {tournament.name}
                   </CardTitle>
                 </CardHeader>
@@ -212,12 +219,12 @@ export default function EntryForm() {
                       }))
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-12 border-2 cursor-pointer">
                       <SelectValue placeholder="Select a team" />
                     </SelectTrigger>
                     <SelectContent>
                       {tournament.teams.map((team) => (
-                        <SelectItem key={team.id} value={String(team.id)}>
+                        <SelectItem key={team.id} value={String(team.id)} className="cursor-pointer">
                           {team.seed != null ? `(${team.seed}) ` : ""}
                           {team.name}
                         </SelectItem>
@@ -232,12 +239,13 @@ export default function EntryForm() {
       )}
 
       {lockedTournaments.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="flex items-center gap-2 text-base font-semibold text-muted-foreground md:text-lg">
-            <Lock className="h-4 w-4" />
-            Locked Tournaments
+        <div className="space-y-4">
+          <h3 className="flex items-center gap-2 font-display text-lg tracking-wide text-muted-foreground">
+            <Lock className="h-5 w-5" />
+            LOCKED TOURNAMENTS
+            <div className="h-px flex-1 bg-border ml-3"></div>
           </h3>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {lockedTournaments.map((tournament) => {
               const pickedTeamId = selectedTeams[tournament.id];
               const pickedTeam = tournament.teams.find(
@@ -246,10 +254,10 @@ export default function EntryForm() {
               return (
                 <div
                   key={tournament.id}
-                  className="flex items-center justify-between rounded-lg border border-dashed p-3 opacity-60"
+                  className="flex items-center justify-between rounded-lg border-2 border-dashed border-border/50 bg-muted/30 p-4 opacity-70"
                 >
-                  <span className="text-sm font-medium">{tournament.name}</span>
-                  <Badge variant="outline" className="text-xs">
+                  <span className="text-sm font-semibold">{tournament.name}</span>
+                  <Badge variant="outline" className="text-xs font-semibold">
                     {pickedTeam ? pickedTeam.name : "No pick"}
                   </Badge>
                 </div>
@@ -260,7 +268,7 @@ export default function EntryForm() {
       )}
 
       {unlockedTournaments.length > 0 && (
-        <Button type="submit" disabled={saving} className="w-full">
+        <Button type="submit" disabled={saving} className="w-full h-14 text-lg font-bold shadow-lg hover:shadow-xl transition-all cursor-pointer">
           {saving
             ? "Saving..."
             : existingEntry
