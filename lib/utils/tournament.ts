@@ -64,16 +64,16 @@ export function validateCreateTournamentInput(
     return { ok: false, error: "endsAt is required" };
   }
 
-  const startsAtDate = parseDateAsET(startsAt);
-  const endsAtDate = parseDateAsET(endsAt);
-
-  if (isNaN(startsAtDate.getTime())) {
+  if (isNaN(new Date(startsAt).getTime())) {
     return { ok: false, error: "startsAt is not a valid date" };
   }
 
-  if (isNaN(endsAtDate.getTime())) {
+  if (isNaN(new Date(endsAt).getTime())) {
     return { ok: false, error: "endsAt is not a valid date" };
   }
+
+  const startsAtDate = parseDateAsET(startsAt);
+  const endsAtDate = parseDateAsET(endsAt);
 
   if (endsAtDate <= startsAtDate) {
     return { ok: false, error: "endsAt must be after startsAt" };
