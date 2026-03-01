@@ -11,6 +11,10 @@ import dotenv from "dotenv";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { rounds, years, tournaments, teams } from "./schema";
+import { parseDateAsET } from "../utils/tournament";
+
+// Convert a date string to midnight ET (avoids UTC-midnight ≠ ET-midnight bug)
+const etDate = (s: string): Date => parseDateAsET(s + "T00:00");
 import { eq } from "drizzle-orm";
 
 dotenv.config({ path: ".env.local" });

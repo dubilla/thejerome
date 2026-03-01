@@ -201,7 +201,7 @@ export default function EntryForm() {
                     {tournament.name}
                   </CardTitle>
                   <p className="text-xs text-muted-foreground">
-                    Starts {new Date(tournament.startsAt).toLocaleDateString(undefined, { month: "short", day: "numeric", timeZone: "America/New_York" })}
+                    Starts {new Date(tournament.startsAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/New_York" })} ET
                   </p>
                 </CardHeader>
                 <CardContent className="px-4 pb-4 pt-0 md:px-6">
@@ -254,7 +254,7 @@ export default function EntryForm() {
                   <div>
                     <span className="text-sm font-semibold">{tournament.name}</span>
                     <p className="text-xs text-muted-foreground">
-                      Started {new Date(tournament.startsAt).toLocaleDateString(undefined, { month: "short", day: "numeric", timeZone: "America/New_York" })}
+                      Started {new Date(tournament.startsAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/New_York" })} ET
                     </p>
                   </div>
                   <Badge variant="outline" className="text-xs font-semibold">
