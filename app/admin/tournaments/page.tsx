@@ -20,6 +20,35 @@ import {
 } from "@/components/ui/table";
 import { isTournamentLocked } from "@/lib/utils/tournament";
 
+// Format a UTC date as a datetime-local string in ET, so the input reflects
+// the actual ET wall-clock time and stays consistent with parseDateAsET on save.
+function toETInputValue(date: Date | string): string {
+  const d = new Date(date);
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(d);
+  const p = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
+  const hour = p.hour === "24" ? "00" : p.hour;
+  return `${p.year}-${p.month}-${p.day}T${hour}:${p.minute}`;
+}
+
+function toETDisplay(date: Date | string): string {
+  return new Date(date).toLocaleString("en-US", {
+    timeZone: "America/New_York",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }) + " ET";
+}
+
 type Tournament = {
   id: number;
   name: string;
@@ -96,10 +125,10 @@ function MobileTournamentCard({
           <>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">
-                Starts: {new Date(tournament.startsAt).toLocaleString()}
+                Starts: {toETDisplay(tournament.startsAt)}
               </p>
               <p className="text-sm text-muted-foreground">
-                Ends: {new Date(tournament.endsAt).toLocaleString()}
+                Ends: {toETDisplay(tournament.endsAt)}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -298,7 +327,7 @@ export default function AdminTournamentsPage() {
                 />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="create-starts-at">Starts At</Label>
+                <Label htmlFor="create-starts-at">Starts At (ET)</Label>
                 <Input
                   id="create-starts-at"
                   type="datetime-local"
@@ -307,7 +336,7 @@ export default function AdminTournamentsPage() {
                 />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="create-ends-at">Ends At</Label>
+                <Label htmlFor="create-ends-at">Ends At (ET)</Label>
                 <Input
                   id="create-ends-at"
                   type="datetime-local"
@@ -354,12 +383,8 @@ export default function AdminTournamentsPage() {
               saving={saving}
               onEdit={() => {
                 setEditingId(tournament.id);
-                setEditStartsAt(
-                  new Date(tournament.startsAt).toISOString().slice(0, 16)
-                );
-                setEditEndsAt(
-                  new Date(tournament.endsAt).toISOString().slice(0, 16)
-                );
+                setEditStartsAt(toETInputValue(tournament.startsAt));
+                setEditEndsAt(toETInputValue(tournament.endsAt));
               }}
               onSave={() => handleSave(tournament.id)}
               onCancel={() => setEditingId(null)}
@@ -408,7 +433,7 @@ export default function AdminTournamentsPage() {
                         className="w-60"
                       />
                     ) : (
-                      new Date(tournament.startsAt).toLocaleString()
+                      toETDisplay(tournament.startsAt)
                     )}
                   </TableCell>
                   <TableCell>
@@ -420,7 +445,7 @@ export default function AdminTournamentsPage() {
                         className="w-60"
                       />
                     ) : (
-                      new Date(tournament.endsAt).toLocaleString()
+                      toETDisplay(tournament.endsAt)
                     )}
                   </TableCell>
                   <TableCell>
@@ -479,16 +504,8 @@ export default function AdminTournamentsPage() {
                         variant="outline"
                         onClick={() => {
                           setEditingId(tournament.id);
-                          setEditStartsAt(
-                            new Date(tournament.startsAt)
-                              .toISOString()
-                              .slice(0, 16)
-                          );
-                          setEditEndsAt(
-                            new Date(tournament.endsAt)
-                              .toISOString()
-                              .slice(0, 16)
-                          );
+                          setEditStartsAt(toETInputValue(tournament.startsAt));
+                          setEditEndsAt(toETInputValue(tournament.endsAt));
                         }}
                       >
                         Edit
