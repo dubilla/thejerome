@@ -18,7 +18,7 @@ export default function LeadersPage() {
         </div>
         <div className="h-0.5 w-24 bg-primary"></div>
         <p className="mt-3 text-muted-foreground">
-          See who's leading the pack
+          See who&apos;s leading the pack
         </p>
       </div>
 
