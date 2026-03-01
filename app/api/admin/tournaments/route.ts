@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { tournaments, years } from "@/lib/db/schema";
 import { getCurrentUser } from "@/lib/auth/session";
-import { validateCreateTournamentInput } from "@/lib/utils/tournament";
+import { validateCreateTournamentInput, parseDateAsET } from "@/lib/utils/tournament";
 
 export async function GET() {
   try {
@@ -93,8 +93,8 @@ export async function PATCH(request: NextRequest) {
     }
 
     const updateData: { startsAt?: Date; endsAt?: Date; isNeutralSite?: boolean } = {};
-    if (startsAt !== undefined) updateData.startsAt = new Date(startsAt);
-    if (endsAt !== undefined) updateData.endsAt = new Date(endsAt);
+    if (startsAt !== undefined) updateData.startsAt = parseDateAsET(startsAt);
+    if (endsAt !== undefined) updateData.endsAt = parseDateAsET(endsAt);
     if (isNeutralSite !== undefined) updateData.isNeutralSite = isNeutralSite;
 
     if (Object.keys(updateData).length === 0) {

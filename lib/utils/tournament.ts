@@ -1,5 +1,34 @@
 import type { Tournament } from "@/lib/db/schema";
 
+// Interpret a datetime-local string (e.g. "2026-03-02T00:00") as ET.
+// datetime-local inputs have no timezone info, so without this the server
+// (running UTC) would store midnight UTC, which displays as the prior day in ET.
+export function parseDateAsET(value: string): Date {
+  const [datePart, timePart = "00:00"] = value.split("T");
+  const [y, mo, d] = datePart.split("-").map(Number);
+  const [h, mi] = (timePart + ":00").split(":").map(Number);
+
+  // Treat the raw components as UTC to get a reference timestamp
+  const utcRef = new Date(Date.UTC(y, mo - 1, d, h, mi));
+
+  // Find what wall-clock time ET shows for utcRef, then measure the offset
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).formatToParts(utcRef);
+  const p = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
+  const etAsUTC = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second);
+
+  // Shift utcRef by the offset so the stored UTC represents the correct ET wall-clock time
+  return new Date(utcRef.getTime() + (utcRef.getTime() - etAsUTC));
+}
+
 export type CreateTournamentInput = {
   name?: unknown;
   startsAt?: unknown;
@@ -35,8 +64,8 @@ export function validateCreateTournamentInput(
     return { ok: false, error: "endsAt is required" };
   }
 
-  const startsAtDate = new Date(startsAt);
-  const endsAtDate = new Date(endsAt);
+  const startsAtDate = parseDateAsET(startsAt);
+  const endsAtDate = parseDateAsET(endsAt);
 
   if (isNaN(startsAtDate.getTime())) {
     return { ok: false, error: "startsAt is not a valid date" };
