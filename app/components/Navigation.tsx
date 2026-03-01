@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Trophy } from "lucide-react";
 
 function NavLink({
   href,
@@ -22,13 +22,16 @@ function NavLink({
     <Link
       href={href}
       onClick={onClick}
-      className={`block px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+      className={`group relative block px-4 py-2 rounded text-sm font-semibold tracking-wide uppercase transition-all cursor-pointer ${
         active
-          ? "bg-accent text-foreground"
-          : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+          ? "text-primary"
+          : "text-muted-foreground hover:text-foreground"
       }`}
     >
       {children}
+      {active && (
+        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary"></span>
+      )}
     </Link>
   );
 }
@@ -41,12 +44,22 @@ export default function Navigation() {
   const closeMenu = () => setMobileMenuOpen(false);
 
   return (
-    <nav className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto max-w-5xl px-4">
+    <nav className="sticky top-0 z-50 border-b-2 border-primary/20 bg-secondary shadow-lg">
+      <div className="mx-auto max-w-6xl px-4">
         {/* Main nav bar */}
-        <div className="flex h-14 items-center justify-between">
-          <Link href="/" className="text-lg font-bold tracking-tight" onClick={closeMenu}>
-            TheJerome
+        <div className="flex h-16 items-center justify-between">
+          {/* Logo */}
+          <Link
+            href="/"
+            className="flex items-center gap-2 group cursor-pointer"
+            onClick={closeMenu}
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary trophy-glow">
+              <Trophy className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <span className="font-display text-2xl tracking-wider text-primary-foreground group-hover:text-primary transition-colors">
+              THE JEROME
+            </span>
           </Link>
 
           {/* Desktop nav links */}
@@ -70,20 +83,21 @@ export default function Navigation() {
           <div className="hidden md:flex md:items-center md:gap-3">
             {session ? (
               <>
-                <span className="text-sm text-muted-foreground truncate max-w-[200px]">
+                <span className="text-xs text-primary-foreground/70 truncate max-w-[200px] uppercase tracking-wide">
                   {session.user.email}
                 </span>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => signOut({ callbackUrl: "/" })}
+                  className="border-primary-foreground/20 text-primary-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary cursor-pointer"
                 >
                   Sign Out
                 </Button>
               </>
             ) : (
               <Link href="/auth/signin">
-                <Button size="sm">Sign In</Button>
+                <Button size="sm" className="cursor-pointer">Sign In</Button>
               </Link>
             )}
           </div>
@@ -91,18 +105,18 @@ export default function Navigation() {
           {/* Mobile menu button */}
           <button
             type="button"
-            className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+            className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-primary-foreground hover:bg-primary transition-colors cursor-pointer"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-expanded={mobileMenuOpen}
             aria-label="Toggle menu"
           >
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
 
         {/* Mobile menu panel */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t pb-4 pt-2 space-y-1">
+          <div className="md:hidden border-t border-primary-foreground/10 pb-4 pt-2 space-y-1">
             {session ? (
               <>
                 <NavLink href="/leaders" active={pathname === "/leaders"} onClick={closeMenu}>
@@ -116,14 +130,14 @@ export default function Navigation() {
                     Admin
                   </NavLink>
                 )}
-                <div className="mt-3 border-t pt-3 px-3">
-                  <p className="text-sm text-muted-foreground truncate mb-2">
+                <div className="mt-3 border-t border-primary-foreground/10 pt-3 px-3">
+                  <p className="text-xs text-primary-foreground/70 truncate mb-2 uppercase tracking-wide">
                     {session.user.email}
                   </p>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full"
+                    className="w-full border-primary-foreground/20 text-primary-foreground hover:bg-primary cursor-pointer"
                     onClick={() => {
                       closeMenu();
                       signOut({ callbackUrl: "/" });
@@ -136,7 +150,7 @@ export default function Navigation() {
             ) : (
               <div className="px-3 pt-2">
                 <Link href="/auth/signin" onClick={closeMenu}>
-                  <Button size="sm" className="w-full">
+                  <Button size="sm" className="w-full cursor-pointer">
                     Sign In
                   </Button>
                 </Link>

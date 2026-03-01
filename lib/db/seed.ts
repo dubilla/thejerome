@@ -66,6 +66,10 @@ async function main() {
     { email: "admin@thejerome.com", passwordHash, isAdmin: true },
     { email: "user1@test.com", passwordHash, isAdmin: false },
     { email: "user2@test.com", passwordHash, isAdmin: false },
+    { email: "user3@test.com", passwordHash, isAdmin: false },
+    { email: "user4@test.com", passwordHash, isAdmin: false },
+    { email: "user5@test.com", passwordHash, isAdmin: false },
+    { email: "user6@test.com", passwordHash, isAdmin: false },
   ];
 
   for (const user of userData) {
@@ -144,23 +148,39 @@ async function main() {
   const adminUser = allUsers.find((u) => u.email === "admin@thejerome.com")!;
   const user1 = allUsers.find((u) => u.email === "user1@test.com")!;
   const user2 = allUsers.find((u) => u.email === "user2@test.com")!;
+  const user3 = allUsers.find((u) => u.email === "user3@test.com")!;
+  const user4 = allUsers.find((u) => u.email === "user4@test.com")!;
+  const user5 = allUsers.find((u) => u.email === "user5@test.com")!;
+  const user6 = allUsers.find((u) => u.email === "user6@test.com")!;
 
   // Get all teams for picks
   const allTeams = await db.select().from(teams);
   const getDuke = allTeams.find((t) => t.name === "Duke")!;
   const getUNC = allTeams.find((t) => t.name === "North Carolina")!;
+  const getVirginia = allTeams.find((t) => t.name === "Virginia")!;
+  const getMiami = allTeams.find((t) => t.name === "Miami")!;
   const getMichigan = allTeams.find((t) => t.name === "Michigan")!;
   const getOhioState = allTeams.find((t) => t.name === "Ohio State")!;
+  const getIndiana = allTeams.find((t) => t.name === "Indiana")!;
+  const getPurdue = allTeams.find((t) => t.name === "Purdue")!;
   const getKentucky = allTeams.find((t) => t.name === "Kentucky")!;
   const getTennessee = allTeams.find((t) => t.name === "Tennessee")!;
+  const getAuburn = allTeams.find((t) => t.name === "Auburn")!;
+  const getAlabama = allTeams.find((t) => t.name === "Alabama")!;
   const getKansas = allTeams.find((t) => t.name === "Kansas")!;
   const getBaylor = allTeams.find((t) => t.name === "Baylor")!;
+  const getTexasTech = allTeams.find((t) => t.name === "Texas Tech")!;
+  const getIowaState = allTeams.find((t) => t.name === "Iowa State")!;
 
-  // Create entries
+  // Create entries with varying scores to make leaderboard interesting
   const entryData = [
-    { name: "Admin's 2026 Entry", userId: adminUser.id, yearId: year2026.id },
-    { name: "User1's 2026 Entry", userId: user1.id, yearId: year2026.id },
-    { name: "User2's 2026 Entry", userId: user2.id, yearId: year2026.id },
+    { name: "Bracket Buster Supreme", userId: adminUser.id, yearId: year2026.id },
+    { name: "March Madness Master", userId: user1.id, yearId: year2026.id },
+    { name: "Cinderella Story", userId: user2.id, yearId: year2026.id },
+    { name: "Chalk City", userId: user3.id, yearId: year2026.id },
+    { name: "The Upset Special", userId: user4.id, yearId: year2026.id },
+    { name: "Buzzer Beater", userId: user5.id, yearId: year2026.id },
+    { name: "Sweet Sixteen Dreams", userId: user6.id, yearId: year2026.id },
   ];
 
   for (const entry of entryData) {
@@ -176,26 +196,54 @@ async function main() {
   const adminEntry = allEntries.find((e) => e.userId === adminUser.id)!;
   const user1Entry = allEntries.find((e) => e.userId === user1.id)!;
   const user2Entry = allEntries.find((e) => e.userId === user2.id)!;
+  const user3Entry = allEntries.find((e) => e.userId === user3.id)!;
+  const user4Entry = allEntries.find((e) => e.userId === user4.id)!;
+  const user5Entry = allEntries.find((e) => e.userId === user5.id)!;
+  const user6Entry = allEntries.find((e) => e.userId === user6.id)!;
 
-  // Create picks - each entry picks one team from each tournament
+  // Create picks with realistic scores (simulating some progress in tournaments)
   const pickData = [
-    // Admin picks
-    { entryId: adminEntry.id, tournamentId: accTournament.id, teamId: getDuke.id, scoreCache: 0 },
-    { entryId: adminEntry.id, tournamentId: bigTenTournament.id, teamId: getMichigan.id, scoreCache: 0 },
-    { entryId: adminEntry.id, tournamentId: secTournament.id, teamId: getKentucky.id, scoreCache: 0 },
-    { entryId: adminEntry.id, tournamentId: big12Tournament.id, teamId: getKansas.id, scoreCache: 0 },
+    // Admin picks - High scorer (145 points)
+    { entryId: adminEntry.id, tournamentId: accTournament.id, teamId: getDuke.id, scoreCache: 42 },
+    { entryId: adminEntry.id, tournamentId: bigTenTournament.id, teamId: getPurdue.id, scoreCache: 38 },
+    { entryId: adminEntry.id, tournamentId: secTournament.id, teamId: getKentucky.id, scoreCache: 35 },
+    { entryId: adminEntry.id, tournamentId: big12Tournament.id, teamId: getKansas.id, scoreCache: 30 },
 
-    // User1 picks
-    { entryId: user1Entry.id, tournamentId: accTournament.id, teamId: getUNC.id, scoreCache: 0 },
-    { entryId: user1Entry.id, tournamentId: bigTenTournament.id, teamId: getOhioState.id, scoreCache: 0 },
-    { entryId: user1Entry.id, tournamentId: secTournament.id, teamId: getTennessee.id, scoreCache: 0 },
-    { entryId: user1Entry.id, tournamentId: big12Tournament.id, teamId: getBaylor.id, scoreCache: 0 },
+    // User1 picks - Second place (132 points)
+    { entryId: user1Entry.id, tournamentId: accTournament.id, teamId: getUNC.id, scoreCache: 38 },
+    { entryId: user1Entry.id, tournamentId: bigTenTournament.id, teamId: getMichigan.id, scoreCache: 32 },
+    { entryId: user1Entry.id, tournamentId: secTournament.id, teamId: getTennessee.id, scoreCache: 35 },
+    { entryId: user1Entry.id, tournamentId: big12Tournament.id, teamId: getBaylor.id, scoreCache: 27 },
 
-    // User2 picks
-    { entryId: user2Entry.id, tournamentId: accTournament.id, teamId: getDuke.id, scoreCache: 0 },
-    { entryId: user2Entry.id, tournamentId: bigTenTournament.id, teamId: getOhioState.id, scoreCache: 0 },
-    { entryId: user2Entry.id, tournamentId: secTournament.id, teamId: getKentucky.id, scoreCache: 0 },
-    { entryId: user2Entry.id, tournamentId: big12Tournament.id, teamId: getKansas.id, scoreCache: 0 },
+    // User2 picks - Third place (118 points)
+    { entryId: user2Entry.id, tournamentId: accTournament.id, teamId: getVirginia.id, scoreCache: 28 },
+    { entryId: user2Entry.id, tournamentId: bigTenTournament.id, teamId: getOhioState.id, scoreCache: 30 },
+    { entryId: user2Entry.id, tournamentId: secTournament.id, teamId: getAuburn.id, scoreCache: 32 },
+    { entryId: user2Entry.id, tournamentId: big12Tournament.id, teamId: getKansas.id, scoreCache: 28 },
+
+    // User3 picks - Mid-pack (95 points)
+    { entryId: user3Entry.id, tournamentId: accTournament.id, teamId: getDuke.id, scoreCache: 25 },
+    { entryId: user3Entry.id, tournamentId: bigTenTournament.id, teamId: getIndiana.id, scoreCache: 22 },
+    { entryId: user3Entry.id, tournamentId: secTournament.id, teamId: getAlabama.id, scoreCache: 24 },
+    { entryId: user3Entry.id, tournamentId: big12Tournament.id, teamId: getTexasTech.id, scoreCache: 24 },
+
+    // User4 picks - Mid-pack (88 points)
+    { entryId: user4Entry.id, tournamentId: accTournament.id, teamId: getMiami.id, scoreCache: 20 },
+    { entryId: user4Entry.id, tournamentId: bigTenTournament.id, teamId: getPurdue.id, scoreCache: 23 },
+    { entryId: user4Entry.id, tournamentId: secTournament.id, teamId: getKentucky.id, scoreCache: 22 },
+    { entryId: user4Entry.id, tournamentId: big12Tournament.id, teamId: getIowaState.id, scoreCache: 23 },
+
+    // User5 picks - Lower (72 points)
+    { entryId: user5Entry.id, tournamentId: accTournament.id, teamId: getUNC.id, scoreCache: 18 },
+    { entryId: user5Entry.id, tournamentId: bigTenTournament.id, teamId: getMichigan.id, scoreCache: 18 },
+    { entryId: user5Entry.id, tournamentId: secTournament.id, teamId: getTennessee.id, scoreCache: 18 },
+    { entryId: user5Entry.id, tournamentId: big12Tournament.id, teamId: getBaylor.id, scoreCache: 18 },
+
+    // User6 picks - Last place (54 points)
+    { entryId: user6Entry.id, tournamentId: accTournament.id, teamId: getVirginia.id, scoreCache: 12 },
+    { entryId: user6Entry.id, tournamentId: bigTenTournament.id, teamId: getOhioState.id, scoreCache: 14 },
+    { entryId: user6Entry.id, tournamentId: secTournament.id, teamId: getAuburn.id, scoreCache: 15 },
+    { entryId: user6Entry.id, tournamentId: big12Tournament.id, teamId: getTexasTech.id, scoreCache: 13 },
   ];
 
   for (const pick of pickData) {
@@ -208,6 +256,10 @@ async function main() {
   console.log("  admin@thejerome.com / password123");
   console.log("  user1@test.com / password123");
   console.log("  user2@test.com / password123");
+  console.log("  user3@test.com / password123");
+  console.log("  user4@test.com / password123");
+  console.log("  user5@test.com / password123");
+  console.log("  user6@test.com / password123");
 
   await client.end();
 }
