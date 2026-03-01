@@ -18,7 +18,7 @@ async function main() {
   console.log("Cleaning up duplicate data...");
 
   // Clean up duplicate teams (keep first occurrence)
-  const teamsResult = await db.execute(sql`
+  await db.execute(sql`
     DELETE FROM "teams" a USING "teams" b
     WHERE a.id > b.id
     AND a.name = b.name
@@ -27,7 +27,7 @@ async function main() {
   console.log(`  ✓ Removed duplicate teams`);
 
   // Clean up duplicate tournaments (keep first occurrence)
-  const tournamentsResult = await db.execute(sql`
+  await db.execute(sql`
     DELETE FROM "tournaments" a USING "tournaments" b
     WHERE a.id > b.id
     AND a.name = b.name

@@ -2,7 +2,6 @@ import { describe, it, expect } from "vitest";
 import {
   calculatePickScore,
   calculateEntryScore,
-  createScore,
 } from "@/lib/utils/scoring";
 
 const rounds = [

@@ -3,7 +3,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { hash } from "bcryptjs";
 import { rounds, years, users, tournaments, teams, entries, picks } from "./schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 // Load from .env.local if it exists (won't override existing env vars)
 dotenv.config({ path: ".env.local" });

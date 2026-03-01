@@ -1,5 +1,5 @@
 import type { Team, Round, Tournament } from "@/lib/db/schema";
-import { createScore, type Score } from "./scoring";
+import { type Score } from "./scoring";
 
 export type PPR = number & { readonly __brand: "PPR" };
 
