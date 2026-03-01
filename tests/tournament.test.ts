@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   isTournamentLocked,
   groupTournamentsByLockStatus,
+  sortTournamentsByStatusAndStartDate,
   validateCreateTournamentInput,
 } from "@/lib/utils/tournament";
 
@@ -59,6 +60,61 @@ describe("groupTournamentsByLockStatus", () => {
     const result = groupTournamentsByLockStatus(tournaments);
     expect(result.locked).toHaveLength(0);
     expect(result.unlocked).toHaveLength(2);
+  });
+});
+
+describe("sortTournamentsByStatusAndStartDate", () => {
+  const past = (offsetDays: number) => new Date(Date.now() - offsetDays * 86400_000);
+  const future = (offsetDays: number) => new Date(Date.now() + offsetDays * 86400_000);
+
+  it("orders in-progress before upcoming before completed", () => {
+    const tournaments = [
+      { id: 1, name: "Completed",   startsAt: past(10), endsAt: past(5) },
+      { id: 2, name: "Upcoming",    startsAt: future(5), endsAt: future(10) },
+      { id: 3, name: "In Progress", startsAt: past(2),  endsAt: future(2) },
+    ];
+
+    const result = sortTournamentsByStatusAndStartDate(tournaments);
+    expect(result.map((t) => t.id)).toEqual([3, 2, 1]);
+  });
+
+  it("sorts by startsAt ascending within the same status group", () => {
+    const tournaments = [
+      { id: 1, name: "Upcoming B", startsAt: future(10), endsAt: future(15) },
+      { id: 2, name: "Upcoming A", startsAt: future(3),  endsAt: future(8) },
+      { id: 3, name: "Upcoming C", startsAt: future(20), endsAt: future(25) },
+    ];
+
+    const result = sortTournamentsByStatusAndStartDate(tournaments);
+    expect(result.map((t) => t.id)).toEqual([2, 1, 3]);
+  });
+
+  it("handles mixed statuses in unsorted input order", () => {
+    const tournaments = [
+      { id: 1, name: "Completed B",   startsAt: past(20), endsAt: past(15) },
+      { id: 2, name: "In Progress A", startsAt: past(3),  endsAt: future(3) },
+      { id: 3, name: "Upcoming A",    startsAt: future(2), endsAt: future(7) },
+      { id: 4, name: "Completed A",   startsAt: past(30), endsAt: past(25) },
+      { id: 5, name: "In Progress B", startsAt: past(1),  endsAt: future(5) },
+      { id: 6, name: "Upcoming B",    startsAt: future(8), endsAt: future(13) },
+    ];
+
+    const result = sortTournamentsByStatusAndStartDate(tournaments);
+    expect(result.map((t) => t.id)).toEqual([2, 5, 3, 6, 4, 1]);
+  });
+
+  it("returns empty array unchanged", () => {
+    expect(sortTournamentsByStatusAndStartDate([])).toEqual([]);
+  });
+
+  it("does not mutate the original array", () => {
+    const tournaments = [
+      { id: 1, name: "B", startsAt: future(10), endsAt: future(15) },
+      { id: 2, name: "A", startsAt: future(3),  endsAt: future(8) },
+    ];
+    const original = [...tournaments];
+    sortTournamentsByStatusAndStartDate(tournaments);
+    expect(tournaments).toEqual(original);
   });
 });
 

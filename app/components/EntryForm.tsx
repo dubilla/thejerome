@@ -169,8 +169,10 @@ export default function EntryForm() {
     );
   }
 
-  const unlockedTournaments = tournaments.filter((t) => !t.locked);
-  const lockedTournaments = tournaments.filter((t) => t.locked);
+  const byStartDate = (a: Tournament, b: Tournament) =>
+    new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime();
+  const unlockedTournaments = tournaments.filter((t) => !t.locked).sort(byStartDate);
+  const lockedTournaments = tournaments.filter((t) => t.locked).sort(byStartDate);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -208,6 +210,9 @@ export default function EntryForm() {
                     <div className="h-2 w-2 rounded-full bg-primary"></div>
                     {tournament.name}
                   </CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    Starts {new Date(tournament.startsAt).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                  </p>
                 </CardHeader>
                 <CardContent className="px-4 pb-4 pt-0 md:px-6">
                   <Select
@@ -256,7 +261,12 @@ export default function EntryForm() {
                   key={tournament.id}
                   className="flex items-center justify-between rounded-lg border-2 border-dashed border-border/50 bg-muted/30 p-4 opacity-70"
                 >
-                  <span className="text-sm font-semibold">{tournament.name}</span>
+                  <div>
+                    <span className="text-sm font-semibold">{tournament.name}</span>
+                    <p className="text-xs text-muted-foreground">
+                      Started {new Date(tournament.startsAt).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                    </p>
+                  </div>
                   <Badge variant="outline" className="text-xs font-semibold">
                     {pickedTeam ? pickedTeam.name : "No pick"}
                   </Badge>
