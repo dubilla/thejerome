@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   isTournamentLocked,
   groupTournamentsByLockStatus,
+  validateCreateTournamentInput,
 } from "@/lib/utils/tournament";
 
 describe("isTournamentLocked", () => {
@@ -58,5 +59,119 @@ describe("groupTournamentsByLockStatus", () => {
     const result = groupTournamentsByLockStatus(tournaments);
     expect(result.locked).toHaveLength(0);
     expect(result.unlocked).toHaveLength(2);
+  });
+});
+
+describe("validateCreateTournamentInput", () => {
+  const valid = {
+    name: "Frozen Four",
+    startsAt: "2099-04-10T12:00",
+    endsAt: "2099-04-12T18:00",
+    isNeutralSite: false,
+  };
+
+  it("returns ok with parsed data for valid input", () => {
+    const result = validateCreateTournamentInput(valid);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.data.name).toBe("Frozen Four");
+      expect(result.data.startsAt).toBeInstanceOf(Date);
+      expect(result.data.endsAt).toBeInstanceOf(Date);
+      expect(result.data.isNeutralSite).toBe(false);
+    }
+  });
+
+  it("trims whitespace from name", () => {
+    const result = validateCreateTournamentInput({ ...valid, name: "  Frozen Four  " });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.data.name).toBe("Frozen Four");
+    }
+  });
+
+  it("sets isNeutralSite to true when passed true", () => {
+    const result = validateCreateTournamentInput({ ...valid, isNeutralSite: true });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.data.isNeutralSite).toBe(true);
+    }
+  });
+
+  it("defaults isNeutralSite to false for non-true values", () => {
+    for (const val of [undefined, null, "true", 1]) {
+      const result = validateCreateTournamentInput({ ...valid, isNeutralSite: val });
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data.isNeutralSite).toBe(false);
+      }
+    }
+  });
+
+  it("fails when name is missing", () => {
+    const result = validateCreateTournamentInput({ ...valid, name: undefined });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toBe("Name is required");
+  });
+
+  it("fails when name is empty string", () => {
+    const result = validateCreateTournamentInput({ ...valid, name: "   " });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toBe("Name is required");
+  });
+
+  it("fails when name is not a string", () => {
+    const result = validateCreateTournamentInput({ ...valid, name: 42 });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toBe("Name is required");
+  });
+
+  it("fails when startsAt is missing", () => {
+    const result = validateCreateTournamentInput({ ...valid, startsAt: undefined });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toBe("startsAt is required");
+  });
+
+  it("fails when startsAt is not a string", () => {
+    const result = validateCreateTournamentInput({ ...valid, startsAt: 12345 });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toBe("startsAt is required");
+  });
+
+  it("fails when startsAt is an invalid date string", () => {
+    const result = validateCreateTournamentInput({ ...valid, startsAt: "not-a-date" });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toBe("startsAt is not a valid date");
+  });
+
+  it("fails when endsAt is missing", () => {
+    const result = validateCreateTournamentInput({ ...valid, endsAt: undefined });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toBe("endsAt is required");
+  });
+
+  it("fails when endsAt is an invalid date string", () => {
+    const result = validateCreateTournamentInput({ ...valid, endsAt: "bad-date" });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toBe("endsAt is not a valid date");
+  });
+
+  it("fails when endsAt is before startsAt", () => {
+    const result = validateCreateTournamentInput({
+      ...valid,
+      startsAt: "2099-04-12T18:00",
+      endsAt: "2099-04-10T12:00",
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toBe("endsAt must be after startsAt");
+  });
+
+  it("fails when endsAt equals startsAt", () => {
+    const result = validateCreateTournamentInput({
+      ...valid,
+      startsAt: "2099-04-10T12:00",
+      endsAt: "2099-04-10T12:00",
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toBe("endsAt must be after startsAt");
   });
 });
