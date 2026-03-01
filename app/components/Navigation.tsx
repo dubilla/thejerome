@@ -90,7 +90,7 @@ export default function Navigation() {
                   variant="outline"
                   size="sm"
                   onClick={() => signOut({ callbackUrl: "/" })}
-                  className="border-primary-foreground/20 text-primary-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary cursor-pointer"
+                  className="bg-transparent border-primary-foreground/40 text-primary-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary cursor-pointer"
                 >
                   Sign Out
                 </Button>
@@ -137,7 +137,7 @@ export default function Navigation() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full border-primary-foreground/20 text-primary-foreground hover:bg-primary cursor-pointer"
+                    className="w-full bg-transparent border-primary-foreground/40 text-primary-foreground hover:bg-primary cursor-pointer"
                     onClick={() => {
                       closeMenu();
                       signOut({ callbackUrl: "/" });
