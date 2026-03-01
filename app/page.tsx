@@ -91,7 +91,7 @@ export default function HomePage() {
                     LEADERBOARD
                   </CardTitle>
                   <CardDescription className="text-base mt-1">
-                    See who's dominating the league
+                    See who&apos;s dominating the league
                   </CardDescription>
                 </div>
               </div>
