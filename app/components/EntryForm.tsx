@@ -100,27 +100,17 @@ export default function EntryForm() {
     e.preventDefault();
     setError("");
 
-    // Validate all unlocked tournaments have picks
-    const unlockedTournaments = tournaments.filter((t) => !t.locked);
-    const missingPicks = unlockedTournaments.filter(
-      (t) => !selectedTeams[t.id]
-    );
-
-    if (missingPicks.length > 0) {
-      setError(
-        `Please make picks for: ${missingPicks.map((t) => t.name).join(", ")}`
-      );
-      return;
-    }
-
     setSaving(true);
 
-    const picks = Object.entries(selectedTeams).map(
-      ([tournamentId, teamId]) => ({
+    const lockedTournamentIds = new Set(
+      tournaments.filter((t) => t.locked).map((t) => t.id)
+    );
+    const picks = Object.entries(selectedTeams)
+      .filter(([tournamentId]) => !lockedTournamentIds.has(parseInt(tournamentId)))
+      .map(([tournamentId, teamId]) => ({
         tournamentId: parseInt(tournamentId),
         teamId: parseInt(teamId),
-      })
-    );
+      }));
 
     try {
       if (existingEntry) {
