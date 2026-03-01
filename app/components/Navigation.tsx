@@ -25,7 +25,7 @@ function NavLink({
       className={`group relative block px-4 py-2 rounded text-sm font-semibold tracking-wide uppercase transition-all cursor-pointer ${
         active
           ? "text-primary"
-          : "text-muted-foreground hover:text-foreground"
+          : "text-primary-foreground/60 hover:text-primary-foreground"
       }`}
     >
       {children}
