@@ -1,5 +1,66 @@
 import type { Tournament } from "@/lib/db/schema";
 
+export type CreateTournamentInput = {
+  name?: unknown;
+  startsAt?: unknown;
+  endsAt?: unknown;
+  isNeutralSite?: unknown;
+};
+
+export type CreateTournamentValidated = {
+  name: string;
+  startsAt: Date;
+  endsAt: Date;
+  isNeutralSite: boolean;
+};
+
+export type ValidationResult =
+  | { ok: true; data: CreateTournamentValidated }
+  | { ok: false; error: string };
+
+export function validateCreateTournamentInput(
+  input: CreateTournamentInput
+): ValidationResult {
+  const { name, startsAt, endsAt, isNeutralSite } = input;
+
+  if (!name || typeof name !== "string" || name.trim() === "") {
+    return { ok: false, error: "Name is required" };
+  }
+
+  if (!startsAt || typeof startsAt !== "string") {
+    return { ok: false, error: "startsAt is required" };
+  }
+
+  if (!endsAt || typeof endsAt !== "string") {
+    return { ok: false, error: "endsAt is required" };
+  }
+
+  const startsAtDate = new Date(startsAt);
+  const endsAtDate = new Date(endsAt);
+
+  if (isNaN(startsAtDate.getTime())) {
+    return { ok: false, error: "startsAt is not a valid date" };
+  }
+
+  if (isNaN(endsAtDate.getTime())) {
+    return { ok: false, error: "endsAt is not a valid date" };
+  }
+
+  if (endsAtDate <= startsAtDate) {
+    return { ok: false, error: "endsAt must be after startsAt" };
+  }
+
+  return {
+    ok: true,
+    data: {
+      name: name.trim(),
+      startsAt: startsAtDate,
+      endsAt: endsAtDate,
+      isNeutralSite: isNeutralSite === true,
+    },
+  };
+}
+
 export type TournamentStatus = "in-progress" | "upcoming" | "completed";
 
 export function isTournamentLocked(startsAt: Date): boolean {

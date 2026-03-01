@@ -130,6 +130,14 @@ export default function AdminTournamentsPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [createName, setCreateName] = useState("");
+  const [createStartsAt, setCreateStartsAt] = useState("");
+  const [createEndsAt, setCreateEndsAt] = useState("");
+  const [createIsNeutralSite, setCreateIsNeutralSite] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState("");
+
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/auth/signin");
@@ -212,6 +220,40 @@ export default function AdminTournamentsPage() {
     }
   }
 
+  async function handleCreate() {
+    setCreating(true);
+    setCreateError("");
+
+    try {
+      const res = await fetch("/api/admin/tournaments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: createName,
+          startsAt: createStartsAt,
+          endsAt: createEndsAt,
+          isNeutralSite: createIsNeutralSite,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to create");
+      }
+
+      setShowCreateForm(false);
+      setCreateName("");
+      setCreateStartsAt("");
+      setCreateEndsAt("");
+      setCreateIsNeutralSite(false);
+      fetchTournaments();
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : "Failed to create");
+    } finally {
+      setCreating(false);
+    }
+  }
+
   if (status === "loading" || loading) {
     return (
       <div className="flex justify-center py-12">
@@ -226,8 +268,70 @@ export default function AdminTournamentsPage() {
     <div className="space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold md:text-2xl">Admin: Tournaments</h1>
-        <Badge variant="outline">Admin</Badge>
+        <div className="flex items-center gap-2">
+          <Button size="sm" onClick={() => setShowCreateForm((v) => !v)}>
+            {showCreateForm ? "Cancel" : "New Tournament"}
+          </Button>
+          <Badge variant="outline">Admin</Badge>
+        </div>
       </div>
+
+      {showCreateForm && (
+        <Card>
+          <CardHeader className="px-4 py-3">
+            <CardTitle className="text-sm font-medium">Create Tournament</CardTitle>
+          </CardHeader>
+          <CardContent className="px-4 pb-4 pt-0 space-y-3">
+            {createError && (
+              <p className="rounded-md bg-red-50 p-3 text-sm text-red-600">
+                {createError}
+              </p>
+            )}
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1 sm:col-span-2">
+                <Label htmlFor="create-name">Name</Label>
+                <Input
+                  id="create-name"
+                  value={createName}
+                  onChange={(e) => setCreateName(e.target.value)}
+                  placeholder="e.g. Frozen Four"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="create-starts-at">Starts At</Label>
+                <Input
+                  id="create-starts-at"
+                  type="datetime-local"
+                  value={createStartsAt}
+                  onChange={(e) => setCreateStartsAt(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="create-ends-at">Ends At</Label>
+                <Input
+                  id="create-ends-at"
+                  type="datetime-local"
+                  value={createEndsAt}
+                  onChange={(e) => setCreateEndsAt(e.target.value)}
+                />
+              </div>
+              <div className="flex items-center gap-2 sm:col-span-2">
+                <Checkbox
+                  id="create-neutral"
+                  checked={createIsNeutralSite}
+                  onCheckedChange={(checked) =>
+                    setCreateIsNeutralSite(checked === true)
+                  }
+                />
+                <Label htmlFor="create-neutral">Neutral Site</Label>
+              </div>
+            </div>
+            <Button onClick={handleCreate} disabled={creating}>
+              {creating ? "Creating..." : "Create Tournament"}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {error && (
         <p className="rounded-md bg-red-50 p-3 text-sm text-red-600">
