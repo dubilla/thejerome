@@ -71,6 +71,9 @@ export default function Navigation() {
               <NavLink href="/entries/new" active={pathname === "/entries/new"}>
                 My Entry
               </NavLink>
+              <NavLink href="/picks" active={pathname === "/picks"}>
+                Picks
+              </NavLink>
               {session.user.isAdmin && (
                 <NavLink href="/admin/tournaments" active={pathname.startsWith("/admin")}>
                   Admin
@@ -124,6 +127,9 @@ export default function Navigation() {
                 </NavLink>
                 <NavLink href="/entries/new" active={pathname === "/entries/new"} onClick={closeMenu}>
                   My Entry
+                </NavLink>
+                <NavLink href="/picks" active={pathname === "/picks"} onClick={closeMenu}>
+                  Picks
                 </NavLink>
                 {session.user.isAdmin && (
                   <NavLink href="/admin/tournaments" active={pathname.startsWith("/admin")} onClick={closeMenu}>
