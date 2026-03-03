@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Trophy, Target, TrendingUp } from "lucide-react";
+import { Trophy, Target, TrendingUp, BarChart2 } from "lucide-react";
 
 export default function HomePage() {
   const { data: session, status } = useSession();
@@ -50,7 +50,7 @@ export default function HomePage() {
       </div>
 
       {session ? (
-        <div className="grid gap-6 md:grid-cols-2 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+        <div className="grid gap-6 md:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
           {/* My Entry Card */}
           <Card className="card-lift border-2 border-primary/20 shadow-lg overflow-hidden group cursor-pointer">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -103,6 +103,35 @@ export default function HomePage() {
                   className="w-full h-12 text-base font-semibold border-2 hover:bg-secondary hover:text-secondary-foreground transition-all cursor-pointer"
                 >
                   View Leaderboard
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+          {/* Picks Card */}
+          <Card className="card-lift border-2 border-secondary/30 shadow-lg overflow-hidden group cursor-pointer">
+            <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <CardHeader className="relative">
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <BarChart2 className="h-7 w-7" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl md:text-2xl font-display tracking-wide">
+                    PICKS
+                  </CardTitle>
+                  <CardDescription className="text-base mt-1">
+                    Compare locked picks across entries
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="relative">
+              <Link href="/picks">
+                <Button
+                  variant="outline"
+                  className="w-full h-12 text-base font-semibold border-2 hover:bg-secondary hover:text-secondary-foreground transition-all cursor-pointer"
+                >
+                  View Picks
                 </Button>
               </Link>
             </CardContent>
