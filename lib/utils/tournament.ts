@@ -34,6 +34,7 @@ export type CreateTournamentInput = {
   startsAt?: unknown;
   endsAt?: unknown;
   isNeutralSite?: unknown;
+  bracketUrl?: unknown;
 };
 
 export type CreateTournamentValidated = {
@@ -41,6 +42,7 @@ export type CreateTournamentValidated = {
   startsAt: Date;
   endsAt: Date;
   isNeutralSite: boolean;
+  bracketUrl?: string;
 };
 
 export type ValidationResult =
@@ -50,7 +52,7 @@ export type ValidationResult =
 export function validateCreateTournamentInput(
   input: CreateTournamentInput
 ): ValidationResult {
-  const { name, startsAt, endsAt, isNeutralSite } = input;
+  const { name, startsAt, endsAt, isNeutralSite, bracketUrl } = input;
 
   if (!name || typeof name !== "string" || name.trim() === "") {
     return { ok: false, error: "Name is required" };
@@ -79,15 +81,18 @@ export function validateCreateTournamentInput(
     return { ok: false, error: "endsAt must be after startsAt" };
   }
 
-  return {
-    ok: true,
-    data: {
-      name: name.trim(),
-      startsAt: startsAtDate,
-      endsAt: endsAtDate,
-      isNeutralSite: isNeutralSite === true,
-    },
+  const validated: CreateTournamentValidated = {
+    name: name.trim(),
+    startsAt: startsAtDate,
+    endsAt: endsAtDate,
+    isNeutralSite: isNeutralSite === true,
   };
+
+  if (typeof bracketUrl === "string" && bracketUrl.trim() !== "") {
+    validated.bracketUrl = bracketUrl.trim();
+  }
+
+  return { ok: true, data: validated };
 }
 
 export type TournamentStatus = "in-progress" | "upcoming" | "completed";

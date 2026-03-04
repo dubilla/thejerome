@@ -55,6 +55,7 @@ type Tournament = {
   startsAt: string;
   endsAt: string;
   isNeutralSite: boolean;
+  bracketUrl: string | null;
   yearId: number;
 };
 
@@ -64,24 +65,28 @@ function MobileTournamentCard({
   isEditing,
   editStartsAt,
   editEndsAt,
+  editBracketUrl,
   saving,
   onEdit,
   onSave,
   onCancel,
   onEditStartsAtChange,
   onEditEndsAtChange,
+  onEditBracketUrlChange,
 }: {
   tournament: Tournament;
   locked: boolean;
   isEditing: boolean;
   editStartsAt: string;
   editEndsAt: string;
+  editBracketUrl: string;
   saving: boolean;
   onEdit: () => void;
   onSave: () => void;
   onCancel: () => void;
   onEditStartsAtChange: (value: string) => void;
   onEditEndsAtChange: (value: string) => void;
+  onEditBracketUrlChange: (value: string) => void;
 }) {
   return (
     <Card>
@@ -112,6 +117,13 @@ function MobileTournamentCard({
               className="w-full"
               placeholder="Ends at"
             />
+            <Input
+              type="url"
+              value={editBracketUrl}
+              onChange={(e) => onEditBracketUrlChange(e.target.value)}
+              className="w-full"
+              placeholder="Bracket URL"
+            />
             <div className="flex gap-2">
               <Button size="sm" onClick={onSave} disabled={saving} className="flex-1">
                 Save
@@ -130,6 +142,11 @@ function MobileTournamentCard({
               <p className="text-sm text-muted-foreground">
                 Ends: {toETDisplay(tournament.endsAt)}
               </p>
+              {tournament.bracketUrl && (
+                <p className="text-sm text-muted-foreground truncate">
+                  Bracket: <a href={tournament.bracketUrl} target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">{tournament.bracketUrl}</a>
+                </p>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <Button size="sm" variant="outline" onClick={onEdit} className="flex-1">
@@ -155,6 +172,7 @@ export default function AdminTournamentsPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editStartsAt, setEditStartsAt] = useState("");
   const [editEndsAt, setEditEndsAt] = useState("");
+  const [editBracketUrl, setEditBracketUrl] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -164,6 +182,7 @@ export default function AdminTournamentsPage() {
   const [createStartsAt, setCreateStartsAt] = useState("");
   const [createEndsAt, setCreateEndsAt] = useState("");
   const [createIsNeutralSite, setCreateIsNeutralSite] = useState(false);
+  const [createBracketUrl, setCreateBracketUrl] = useState("");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
 
@@ -232,6 +251,7 @@ export default function AdminTournamentsPage() {
           tournamentId,
           startsAt: editStartsAt,
           endsAt: editEndsAt,
+          bracketUrl: editBracketUrl,
         }),
       });
 
@@ -262,6 +282,7 @@ export default function AdminTournamentsPage() {
           startsAt: createStartsAt,
           endsAt: createEndsAt,
           isNeutralSite: createIsNeutralSite,
+          bracketUrl: createBracketUrl,
         }),
       });
 
@@ -275,6 +296,7 @@ export default function AdminTournamentsPage() {
       setCreateStartsAt("");
       setCreateEndsAt("");
       setCreateIsNeutralSite(false);
+      setCreateBracketUrl("");
       fetchTournaments();
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : "Failed to create");
@@ -354,6 +376,16 @@ export default function AdminTournamentsPage() {
                 />
                 <Label htmlFor="create-neutral">Neutral Site</Label>
               </div>
+              <div className="space-y-1 sm:col-span-2">
+                <Label htmlFor="create-bracket-url">Bracket URL</Label>
+                <Input
+                  id="create-bracket-url"
+                  type="url"
+                  value={createBracketUrl}
+                  onChange={(e) => setCreateBracketUrl(e.target.value)}
+                  placeholder="https://..."
+                />
+              </div>
             </div>
             <Button onClick={handleCreate} disabled={creating}>
               {creating ? "Creating..." : "Create Tournament"}
@@ -380,16 +412,19 @@ export default function AdminTournamentsPage() {
               isEditing={editingId === tournament.id}
               editStartsAt={editStartsAt}
               editEndsAt={editEndsAt}
+              editBracketUrl={editBracketUrl}
               saving={saving}
               onEdit={() => {
                 setEditingId(tournament.id);
                 setEditStartsAt(toETInputValue(tournament.startsAt));
                 setEditEndsAt(toETInputValue(tournament.endsAt));
+                setEditBracketUrl(tournament.bracketUrl || "");
               }}
               onSave={() => handleSave(tournament.id)}
               onCancel={() => setEditingId(null)}
               onEditStartsAtChange={setEditStartsAt}
               onEditEndsAtChange={setEditEndsAt}
+              onEditBracketUrlChange={setEditBracketUrl}
             />
           );
         })}
@@ -410,6 +445,7 @@ export default function AdminTournamentsPage() {
               <TableHead>Ends At</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Neutral Site</TableHead>
+              <TableHead>Bracket</TableHead>
               <TableHead>Teams</TableHead>
               <TableHead className="w-32">Actions</TableHead>
             </TableRow>
@@ -473,6 +509,28 @@ export default function AdminTournamentsPage() {
                     </div>
                   </TableCell>
                   <TableCell>
+                    {isEditing ? (
+                      <Input
+                        type="url"
+                        value={editBracketUrl}
+                        onChange={(e) => setEditBracketUrl(e.target.value)}
+                        className="w-48"
+                        placeholder="Bracket URL"
+                      />
+                    ) : tournament.bracketUrl ? (
+                      <a
+                        href={tournament.bracketUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm underline hover:text-primary truncate block max-w-[200px]"
+                      >
+                        {new URL(tournament.bracketUrl).hostname}
+                      </a>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
                     <Link
                       href={`/admin/tournaments/${tournament.id}/teams`}
                       className="text-sm underline hover:text-primary"
@@ -506,6 +564,7 @@ export default function AdminTournamentsPage() {
                           setEditingId(tournament.id);
                           setEditStartsAt(toETInputValue(tournament.startsAt));
                           setEditEndsAt(toETInputValue(tournament.endsAt));
+                          setEditBracketUrl(tournament.bracketUrl || "");
                         }}
                       >
                         Edit
@@ -518,7 +577,7 @@ export default function AdminTournamentsPage() {
             {tournaments.length === 0 && (
               <TableRow>
                 <TableCell
-                  colSpan={7}
+                  colSpan={8}
                   className="text-center text-muted-foreground"
                 >
                   No tournaments found

@@ -1,6 +1,6 @@
 {
-  "id": "372a665f-3fdd-4282-9dc1-d03b85d38076",
-  "prevId": "5ebb0bd5-3138-4818-9709-9bc0687fee66",
+  "id": "ee7817cd-6d86-4f73-bac1-e666bcede1a5",
+  "prevId": "372a665f-3fdd-4282-9dc1-d03b85d38076",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -343,6 +343,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": false
+        },
+        "bracket_url": {
+          "name": "bracket_url",
+          "type": "varchar(2048)",
+          "primaryKey": false,
+          "notNull": false
         },
         "year_id": {
           "name": "year_id",
