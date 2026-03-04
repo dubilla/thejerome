@@ -89,10 +89,29 @@ export function validateCreateTournamentInput(
   };
 
   if (typeof bracketUrl === "string" && bracketUrl.trim() !== "") {
-    validated.bracketUrl = bracketUrl.trim();
+    const urlResult = validateBracketUrl(bracketUrl.trim());
+    if (!urlResult.ok) return { ok: false, error: urlResult.error };
+    validated.bracketUrl = urlResult.url;
   }
 
   return { ok: true, data: validated };
+}
+
+export type BracketUrlResult =
+  | { ok: true; url: string }
+  | { ok: false; error: string };
+
+export function validateBracketUrl(value: string): BracketUrlResult {
+  let parsed: URL;
+  try {
+    parsed = new URL(value);
+  } catch {
+    return { ok: false, error: "bracketUrl is not a valid URL" };
+  }
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    return { ok: false, error: "bracketUrl must use http or https" };
+  }
+  return { ok: true, url: parsed.toString() };
 }
 
 export type TournamentStatus = "in-progress" | "upcoming" | "completed";
