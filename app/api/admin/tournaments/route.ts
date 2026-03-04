@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { tournaments, years } from "@/lib/db/schema";
 import { getCurrentUser } from "@/lib/auth/session";
-import { validateCreateTournamentInput, parseDateAsET } from "@/lib/utils/tournament";
+import { validateCreateTournamentInput } from "@/lib/utils/tournament";
 
 export async function GET() {
   try {
@@ -76,54 +76,3 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function PATCH(request: NextRequest) {
-  try {
-    const user = await getCurrentUser();
-    if (!user?.isAdmin) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    const { tournamentId, startsAt, endsAt, isNeutralSite, bracketUrl } = await request.json();
-
-    if (!tournamentId) {
-      return NextResponse.json(
-        { error: "Tournament ID is required" },
-        { status: 400 }
-      );
-    }
-
-    const updateData: { startsAt?: Date; endsAt?: Date; isNeutralSite?: boolean; bracketUrl?: string | null } = {};
-    if (startsAt !== undefined) updateData.startsAt = parseDateAsET(startsAt);
-    if (endsAt !== undefined) updateData.endsAt = parseDateAsET(endsAt);
-    if (isNeutralSite !== undefined) updateData.isNeutralSite = isNeutralSite;
-    if (bracketUrl !== undefined) updateData.bracketUrl = bracketUrl || null;
-
-    if (Object.keys(updateData).length === 0) {
-      return NextResponse.json(
-        { error: "No fields to update" },
-        { status: 400 }
-      );
-    }
-
-    const [updated] = await db
-      .update(tournaments)
-      .set(updateData)
-      .where(eq(tournaments.id, tournamentId))
-      .returning();
-
-    if (!updated) {
-      return NextResponse.json(
-        { error: "Tournament not found" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({ tournament: updated });
-  } catch (error) {
-    console.error("PATCH /api/admin/tournaments error:", error);
-    return NextResponse.json(
-      { error: "Failed to update tournament", details: String(error) },
-      { status: 500 }
-    );
-  }
-}

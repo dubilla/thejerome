@@ -219,11 +219,10 @@ export default function AdminTournamentsPage() {
 
   async function handleToggleNeutralSite(tournament: Tournament) {
     try {
-      const res = await fetch("/api/admin/tournaments", {
+      const res = await fetch(`/api/admin/tournaments/${tournament.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          tournamentId: tournament.id,
           isNeutralSite: !tournament.isNeutralSite,
         }),
       });
@@ -244,11 +243,10 @@ export default function AdminTournamentsPage() {
     setError("");
 
     try {
-      const res = await fetch("/api/admin/tournaments", {
+      const res = await fetch(`/api/admin/tournaments/${tournamentId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          tournamentId,
           startsAt: editStartsAt,
           endsAt: editEndsAt,
           bracketUrl: editBracketUrl,
