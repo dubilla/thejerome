@@ -53,7 +53,7 @@ export default function HomePage() {
         <div className="grid gap-6 md:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
           {/* My Entry Card */}
           <Card className="card-lift border-2 border-primary/20 shadow-lg overflow-hidden group cursor-pointer">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
             <CardHeader className="relative">
               <div className="flex items-center gap-4">
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg trophy-glow group-hover:scale-110 transition-transform duration-300">
@@ -80,7 +80,7 @@ export default function HomePage() {
 
           {/* Leaderboard Card */}
           <Card className="card-lift border-2 border-secondary/30 shadow-lg overflow-hidden group cursor-pointer">
-            <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
             <CardHeader className="relative">
               <div className="flex items-center gap-4">
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground shadow-lg group-hover:scale-110 transition-transform duration-300">
@@ -109,7 +109,7 @@ export default function HomePage() {
           </Card>
           {/* Picks Card */}
           <Card className="card-lift border-2 border-secondary/30 shadow-lg overflow-hidden group cursor-pointer">
-            <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
             <CardHeader className="relative">
               <div className="flex items-center gap-4">
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground shadow-lg group-hover:scale-110 transition-transform duration-300">
