@@ -83,7 +83,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const { tournamentId, startsAt, endsAt, isNeutralSite } = await request.json();
+    const { tournamentId, startsAt, endsAt, isNeutralSite, bracketUrl } = await request.json();
 
     if (!tournamentId) {
       return NextResponse.json(
@@ -92,10 +92,11 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const updateData: { startsAt?: Date; endsAt?: Date; isNeutralSite?: boolean } = {};
+    const updateData: { startsAt?: Date; endsAt?: Date; isNeutralSite?: boolean; bracketUrl?: string | null } = {};
     if (startsAt !== undefined) updateData.startsAt = parseDateAsET(startsAt);
     if (endsAt !== undefined) updateData.endsAt = parseDateAsET(endsAt);
     if (isNeutralSite !== undefined) updateData.isNeutralSite = isNeutralSite;
+    if (bracketUrl !== undefined) updateData.bracketUrl = bracketUrl || null;
 
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json(

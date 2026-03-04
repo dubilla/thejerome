@@ -2,82 +2,89 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-type Team = {
-  id: number;
-  name: string;
-  seed: number | null;
-  isEliminated: boolean;
-  round: { id: number; name: string; order: number; points: number } | null;
-};
-
-type Tournament = {
-  id: number;
-  name: string;
-  startsAt: string;
-  locked: boolean;
-  teams: Team[];
-};
-
-function MobileTeamRow({ team }: { team: Team }) {
-  return (
-    <div className="flex items-center justify-between py-2">
-      <span className="text-sm font-medium">{team.name}</span>
-      {team.isEliminated ? (
-        <Badge variant="destructive" className="text-xs">Eliminated</Badge>
-      ) : (
-        <Badge variant="secondary" className="text-xs">Active</Badge>
-      )}
-    </div>
-  );
-}
+import {
+  PicksDashboardData,
+  TournamentData,
+  DesktopGrid,
+  MobileGrid,
+  StatusBadge,
+  formatDateET,
+} from "@/app/components/PicksGrid";
 
 export default function TournamentDetailPage() {
   const params = useParams();
-  const [tournament, setTournament] = useState<Tournament | null>(null);
+  const tournamentId = parseInt(params.id as string);
+
+  const [tournament, setTournament] = useState<TournamentData | null>(null);
+  const [bracketUrl, setBracketUrl] = useState<string | null>(null);
+  const [picksData, setPicksData] = useState<PicksDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchTournament = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError("");
 
     try {
-      const res = await fetch("/api/tournaments");
-      if (!res.ok) throw new Error("Failed to fetch tournaments");
+      const [tournamentsRes, picksRes] = await Promise.all([
+        fetch("/api/tournaments"),
+        fetch("/api/picks"),
+      ]);
 
-      const data = await res.json();
-      const found = (data.tournaments || []).find(
-        (t: Tournament) => t.id === parseInt(params.id as string)
+      if (!tournamentsRes.ok) throw new Error("Failed to fetch tournaments");
+
+      const tournamentsData = await tournamentsRes.json();
+      const found = (tournamentsData.tournaments || []).find(
+        (t: { id: number; locked: boolean }) => t.id === tournamentId
       );
 
       if (!found) {
         setError("Tournament not found");
-      } else if (!found.locked) {
+        return;
+      }
+
+      if (!found.locked) {
         setError("Tournament hasn't started yet");
+        return;
+      }
+
+      setBracketUrl(found.bracketUrl || null);
+
+      if (!picksRes.ok) throw new Error("Failed to fetch picks");
+
+      const picks: PicksDashboardData = await picksRes.json();
+      setPicksData(picks);
+
+      const tournamentPicks = picks.tournaments.find(
+        (t) => t.id === tournamentId
+      );
+
+      if (tournamentPicks) {
+        setTournament(tournamentPicks);
       } else {
-        setTournament(found);
+        // Tournament is locked but has no picks data — show minimal info
+        setTournament({
+          id: found.id,
+          name: found.name,
+          startsAt: found.startsAt,
+          endsAt: found.endsAt,
+          isNeutralSite: found.isNeutralSite,
+          status: "in-progress",
+          picks: [],
+        });
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load");
     } finally {
       setLoading(false);
     }
-  }, [params.id]);
+  }, [tournamentId]);
 
   useEffect(() => {
-    fetchTournament();
-  }, [fetchTournament]);
+    fetchData();
+  }, [fetchData]);
 
   if (loading) {
     return (
@@ -95,78 +102,51 @@ export default function TournamentDetailPage() {
 
   if (!tournament) return null;
 
-  // Group teams by round
-  const teamsByRound = new Map<string, Team[]>();
-  for (const team of tournament.teams) {
-    const roundName = team.round?.name || "Unknown";
-    if (!teamsByRound.has(roundName)) {
-      teamsByRound.set(roundName, []);
-    }
-    teamsByRound.get(roundName)!.push(team);
-  }
-
-  // Sort rounds by order
-  const sortedRounds = [...teamsByRound.entries()].sort((a, b) => {
-    const orderA = a[1][0]?.round?.order || 0;
-    const orderB = b[1][0]?.round?.order || 0;
-    return orderB - orderA;
-  });
-
   return (
     <div className="space-y-4 md:space-y-6">
-      <h1 className="text-xl font-bold md:text-2xl">{tournament.name}</h1>
+      {/* Header */}
+      <div className="flex flex-wrap items-center gap-3">
+        <h1 className="text-xl font-bold md:text-2xl">{tournament.name}</h1>
+        <span className="text-sm text-muted-foreground">
+          {formatDateET(tournament.startsAt)}
+        </span>
+        <StatusBadge status={tournament.status} />
+        {bracketUrl && (
+          <a
+            href={bracketUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+          >
+            <ExternalLink className="h-4 w-4" />
+            Bracket
+          </a>
+        )}
+      </div>
 
-      {sortedRounds.map(([roundName, teams]) => (
-        <Card key={roundName}>
-          <CardHeader className="px-4 py-3 md:px-6 md:py-4">
-            <CardTitle className="flex items-center gap-2 text-sm font-semibold md:text-base">
-              {roundName}
-              {teams[0]?.round?.points ? (
-                <Badge variant="secondary" className="text-xs">
-                  {teams[0].round.points} pts
-                </Badge>
-              ) : null}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-4 pt-0 md:px-6">
-            {/* Mobile layout */}
-            <div className="divide-y md:hidden">
-              {teams.map((team) => (
-                <MobileTeamRow key={team.id} team={team} />
-              ))}
-            </div>
-
-            {/* Desktop table layout */}
-            <div className="hidden md:block">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Team</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {teams.map((team) => (
-                    <TableRow key={team.id}>
-                      <TableCell className="font-medium">
-                        {team.seed != null ? `(${team.seed}) ` : ""}
-                        {team.name}
-                      </TableCell>
-                      <TableCell>
-                        {team.isEliminated ? (
-                          <Badge variant="destructive">Eliminated</Badge>
-                        ) : (
-                          <Badge variant="secondary">Active</Badge>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+      {/* Picks grid */}
+      {picksData && picksData.entries.length > 0 ? (
+        <>
+          <div className="hidden md:block">
+            <DesktopGrid
+              tournament={tournament}
+              entries={picksData.entries}
+              myEntryId={picksData.myEntryId}
+            />
+          </div>
+          <div className="md:hidden">
+            <MobileGrid
+              tournament={tournament}
+              entries={picksData.entries}
+              myEntryId={picksData.myEntryId}
+            />
+          </div>
+        </>
+      ) : (
+        <p className="text-muted-foreground py-8 text-center">
+          No picks to display.
+        </p>
+      )}
     </div>
   );
 }

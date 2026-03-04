@@ -59,6 +59,7 @@ export const tournaments = pgTable(
     startsAt: timestamp("starts_at", { mode: "date" }).notNull(),
     endsAt: timestamp("ends_at", { mode: "date" }).notNull(),
     isNeutralSite: boolean("is_neutral_site").notNull().default(false),
+    bracketUrl: varchar("bracket_url", { length: 2048 }),
     yearId: integer("year_id")
       .notNull()
       .references(() => years.id),
