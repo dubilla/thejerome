@@ -5,11 +5,17 @@ import { tournaments, years } from "@/lib/db/schema";
 import { getCurrentUser } from "@/lib/auth/session";
 import { validateCreateTournamentInput } from "@/lib/utils/tournament";
 
-export async function GET() {
+
+export async function GET(request: NextRequest) {
   try {
-    const user = await getCurrentUser();
-    if (!user?.isAdmin) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const authHeader = request.headers.get("authorization");
+    const bearerAuthed = authHeader?.startsWith("Bearer ") && process.env.ADMIN_API_KEY
+      && authHeader.slice(7) === process.env.ADMIN_API_KEY;
+    if (!bearerAuthed) {
+      const user = await getCurrentUser();
+      if (!user?.isAdmin) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
     }
 
     const [activeYear] = await db
