@@ -15,7 +15,7 @@ export function createPPR(value: number): PPR {
 export function calculatePPR(
   currentScore: Score,
   picks: Array<{ teamId: number }>,
-  teams: Array<Pick<Team, "id" | "isEliminated" | "seed" | "tournamentId">>,
+  teams: Array<Pick<Team, "id" | "isEliminated" | "roundId" | "seed" | "tournamentId">>,
   rounds: Array<Pick<Round, "id" | "points" | "order">>,
   tournaments?: Array<Pick<Tournament, "id" | "isNeutralSite">>
 ): PPR {
@@ -28,6 +28,7 @@ export function calculatePPR(
   for (const pick of picks) {
     const team = teams.find((t) => t.id === pick.teamId);
     if (!team || team.isEliminated) continue;
+    if (team.roundId === maxRound.id) continue; // already won, points already in currentScore
 
     // Check if this team could earn the +7 bonus
     const tournament = tournaments?.find((t) => t.id === team.tournamentId);

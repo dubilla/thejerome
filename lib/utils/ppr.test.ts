@@ -14,31 +14,37 @@ const nonNeutralTournament = { id: 2, isNeutralSite: false };
 
 describe("calculatePPR", () => {
   it("adds max round points for each active pick", () => {
-    const teams = [{ id: 1, isEliminated: false, seed: 1, tournamentId: 1 }];
+    const teams = [{ id: 1, isEliminated: false, roundId: 1, seed: 1, tournamentId: 1 }];
     const ppr = calculatePPR(createScore(0), [{ teamId: 1 }], teams, rounds, [neutralTournament]);
     expect(ppr).toBe(5); // current 0 + max 5
   });
 
   it("adds 7 for an active upset-eligible pick at neutral site", () => {
-    const teams = [{ id: 1, isEliminated: false, seed: 3, tournamentId: 1 }];
+    const teams = [{ id: 1, isEliminated: false, roundId: 1, seed: 3, tournamentId: 1 }];
     const ppr = calculatePPR(createScore(0), [{ teamId: 1 }], teams, rounds, [neutralTournament]);
     expect(ppr).toBe(7); // seed > 2 + neutral site → bonus eligible
   });
 
   it("does not add max for eliminated picks", () => {
-    const teams = [{ id: 1, isEliminated: true, seed: 1, tournamentId: 1 }];
+    const teams = [{ id: 1, isEliminated: true, roundId: 1, seed: 1, tournamentId: 1 }];
     const ppr = calculatePPR(createScore(2), [{ teamId: 1 }], teams, rounds, [neutralTournament]);
     expect(ppr).toBe(2); // no remaining points, just current score
   });
 
+  it("does not add max for champion picks — already scored, tournament over", () => {
+    const teams = [{ id: 1, isEliminated: false, roundId: 6, seed: 1, tournamentId: 1 }];
+    const ppr = calculatePPR(createScore(5), [{ teamId: 1 }], teams, rounds, [neutralTournament]);
+    expect(ppr).toBe(5); // points already in currentScore, nothing remaining
+  });
+
   it("includes current score in result", () => {
-    const teams = [{ id: 1, isEliminated: false, seed: 1, tournamentId: 1 }];
+    const teams = [{ id: 1, isEliminated: false, roundId: 1, seed: 1, tournamentId: 1 }];
     const ppr = calculatePPR(createScore(2), [{ teamId: 1 }], teams, rounds, [neutralTournament]);
     expect(ppr).toBe(7); // 2 current + 5 max
   });
 
   it("does not apply bonus at non-neutral site", () => {
-    const teams = [{ id: 1, isEliminated: false, seed: 3, tournamentId: 2 }];
+    const teams = [{ id: 1, isEliminated: false, roundId: 1, seed: 3, tournamentId: 2 }];
     const ppr = calculatePPR(createScore(0), [{ teamId: 1 }], teams, rounds, [nonNeutralTournament]);
     expect(ppr).toBe(5); // no bonus, just max round points
   });
