@@ -23,6 +23,17 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "THE JEROME | Tournament Prediction League",
   description: "Dominate the bracket. Own the leaderboard. College basketball tournament prediction game.",
+  openGraph: {
+    title: "THE JEROME | Tournament Prediction League",
+    description: "Dominate the bracket. Own the leaderboard. College basketball tournament prediction game.",
+    type: "website",
+    siteName: "THE JEROME",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "THE JEROME | Tournament Prediction League",
+    description: "Dominate the bracket. Own the leaderboard. College basketball tournament prediction game.",
+  },
 };
 
 export default function RootLayout({
