@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Bebas_Neue, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import SessionProvider from "./components/SessionProvider";
+import ThemeProvider from "./components/ThemeProvider";
 import Navigation from "./components/Navigation";
 
 const inter = Inter({
@@ -42,13 +43,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("theme");if(t==="dark"||(!t&&matchMedia("(prefers-color-scheme:dark)").matches))document.documentElement.classList.add("dark")}catch(e){}})()`,
+          }}
+        />
+      </head>
       <body
         className={`${inter.variable} ${bebas.variable} ${jetbrains.variable} antialiased`}
       >
         <SessionProvider>
-          <Navigation />
-          <main className="mx-auto max-w-6xl px-4 py-6 md:px-6 md:py-8">{children}</main>
+          <ThemeProvider>
+            <Navigation />
+            <main className="mx-auto max-w-6xl px-4 py-6 md:px-6 md:py-8">{children}</main>
+          </ThemeProvider>
         </SessionProvider>
       </body>
     </html>
